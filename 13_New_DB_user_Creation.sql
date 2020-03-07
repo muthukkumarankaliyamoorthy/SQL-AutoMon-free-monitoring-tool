@@ -1,0 +1,173 @@
+USE [DBAdata]
+GO
+/****** Object:  StoredProcedure [dbo].[USP_DBA_GETNEW_DB_AND_LOGIN]    Script Date: 9/27/2013 7:44:10 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/*
+use dbadata
+go
+go
+drop table DBA_NEW_OBJECT_LOGIN_LIST
+go
+CREATE TABLE [dbo].[DBA_NEW_OBJECT_LOGIN_LIST](
+	[SERVER_NAME] [varchar](100),
+	[NAME] [sysname] NOT NULL,
+	[CREATE_DATE] [datetime] NULL,
+	[TYPE] [varchar](10) NULL
+)
+
+
+use dbadata_archive
+go
+drop table DBA_NEW_OBJECT_LOGIN_LIST
+go
+CREATE TABLE [dbo].[DBA_NEW_OBJECT_LOGIN_LIST](
+	[SERVER_NAME] [varchar](100),
+	[NAME] [sysname] NOT NULL,
+	[CREATE_DATE] [datetime] NULL,
+	[TYPE] [varchar](10) NULL,
+	[Upload_date] [varchar](10) NULL
+)
+
+*/
+
+
+ALTER PROCEDURE [dbo].[USP_DBA_GETNEW_DB_AND_LOGIN]
+AS BEGIN
+SET NOCOUNT ON
+TRUNCATE TABLE DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+
+DECLARE @SERVERNAME VARCHAR(200)
+DECLARE @DESC VARCHAR(200)
+--** PUT LOCAL SERVER FIRST.
+--select @@servername
+INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+SELECT @@servername as servername,NAME,CRDATE,'DATABASE' FROM MASTER.DBO.SYSDATABASES
+WHERE CRDATE >= GETDATE()-1
+
+INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+SELECT @@servername,LOGINNAME,CREATEDATE,'LOGIN'FROM MASTER.DBO.SYSLOGINS
+WHERE CREATEDATE >=GETDATE()-1
+
+PRINT @@SERVERNAME +' COMPLETED.'
+
+DECLARE ALLNEW_DB_LOGIN CURSOR
+FOR
+SELECT SERVERNAME,[DESCRIPTION] FROM DBADATA.DBO.DBA_ALL_SERVERS where SVR_status ='running'
+OPEN ALLNEW_DB_LOGIN
+FETCH NEXT FROM ALLNEW_DB_LOGIN INTO @SERVERNAME,@DESC
+
+WHILE @@FETCH_STATUS=0  
+BEGIN
+BEGIN TRY
+
+
+EXEC('INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+SELECT '''+@DESC+''',NAME,CRDATE,''DATABASE'' FROM ['+@SERVERNAME+'].MASTER.DBO.SYSDATABASES
+WHERE CRDATE >= GETDATE()-1')
+
+EXEC('INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+SELECT '''+@DESC+''',LOGINNAME,CREATEDATE,''LOGIN'' FROM ['+@SERVERNAME+'].MASTER.DBO.SYSLOGINS
+WHERE CREATEDATE >=GETDATE()-1')
+
+--PRINT 'SERVER ' +@SERVERNAME+' COMPLETED.'
+
+end try
+BEGIN CATCH
+--SELECT @SERVER_NAME,ERROR_NUMBER() AS ErrorNumber,ERROR_MESSAGE() AS ErrorMessage;
+insert into tbl_Error_handling
+ 
+SELECT @DESC,'NEW_DB',[Error_Line] = ERROR_LINE(),[Error_Number] = ERROR_NUMBER(),
+[Error_Severity] = ERROR_SEVERITY(),[Error_State] = ERROR_STATE(),
+[Error_Message] = ERROR_MESSAGE(),GETDATE()
+
+PRINT 'SERVER ['+@SERVERNAME+']is not COMPLETED.'
+END CATCH
+
+FETCH NEXT FROM ALLNEW_DB_LOGIN INTO @SERVERNAME,@DESC
+END
+CLOSE ALLNEW_DB_LOGIN
+DEALLOCATE ALLNEW_DB_LOGIN
+
+----------------------------------------------------
+-- May be its time to send the report to my DBA
+IF EXISTS(
+SELECT 1 FROM [DBADATA].[DBO].[DBA_NEW_OBJECT_LOGIN_LIST]
+WHERE CREATE_DATE >=GETDATE()-1
+)
+BEGIN
+DECLARE @SERVER_NAME SYSNAME
+DECLARE @NAME SYSNAME
+DECLARE @CREATE_DATE DATETIME 
+DECLARE @TYPE VARCHAR(10)
+
+DECLARE NEWDB_LOGIN_CUR CURSOR FOR
+SELECT SERVER_NAME,NAME,TYPE,CREATE_DATE
+FROM DBADATA.DBO.[DBA_NEW_OBJECT_LOGIN_LIST] WHERE CREATE_DATE >=GETDATE()-1
+
+OPEN NEWDB_LOGIN_CUR
+
+FETCH NEXT FROM NEWDB_LOGIN_CUR
+INTO @SERVER_NAME,@NAME,@TYPE,@CREATE_DATE
+
+DECLARE @BODY1 VARCHAR(max)
+--#ECE5B6
+SET @BODY1=  '<font size=2 color=BLUE  face=''verdana''><B>FOLLOWING ARE NEWLY CREATED DB AND LOGINs:</b> </font>
+<P> 
+ <font size=1 color=BLUE  face=''verdana''>
+<Table border=1000 bgcolor=LIGHTBLUE cellpadding=1  style="color:BLUE;font-face:verdana;font-size:12px;">  
+ <b>  <tr bgcolor=BLUE align=center style="color:WHITE;font-weight:bold"> 
+<td width=600 color=white>SERVERNAME</td>  
+<td width=200 color=white>NAME</td> 
+<td width=100 color=white>TYPE</td>  </b> 
+ <td width=200 color=white>CREATE DATE</td>  
+ </tr>'
+
+WHILE @@FETCH_STATUS=0
+BEGIN
+SET @BODY1= @BODY1 +'<tr>
+<td>'+ISNULL(@SERVER_NAME,'&nbsp;')+'</td>'+
+'<td>'+ISNULL(@NAME,'&nbsp;')+'</td>'+
+'<td align=center>'+ISNULL(@TYPE,'&nbsp;')+'</td>'+
+'<td align=center>'+ISNULL(CONVERT(CHAR(50),@CREATE_DATE),'&nbsp;')+'</td>' 
+FETCH NEXT FROM NEWDB_LOGIN_CUR
+INTO @SERVER_NAME,@NAME,@TYPE,@CREATE_DATE
+
+END
+SET @BODY1=@BODY1+'</Table> </p>
+<p>
+<font style="color:#7E2217;font-face:verdana;font-size:9px;"> Generated on '
++convert(varchar(30),getdate(),100)+'. </BR>
+This is an auto generated mail by DBA Team. If you receive this email by mistake please contact us. 
+ </br>
+© Property of DBA Team.
+ </font>'
+
+CLOSE NEWDB_LOGIN_CUR
+DEALLOCATE NEWDB_LOGIN_CUR
+DECLARE @EMAILIDS VARCHAR(500)
+
+SELECT @EMAILIDS=
+COALESCE(@EMAILIDS+';','')+EMAIL_ADDRESS  
+FROM DBADATA.dbo.DBA_ALL_OPERATORS WHERE name ='muthu' and STATUS =1
+
+
+DECLARE @EMAILIDS1 VARCHAR(500)
+--SELECT @EMAILIDS1= 'Nageswararao.Kankipati@cna.com;Sadhana.Bandakunta@cna.com'
+
+
+EXEC MSDB.DBO.SP_SEND_DBMAIL @RECIPIENTS=@EMAILIDS,
+@SUBJECT = 'DBA: New DB and Objects creation',
+@BODY = @BODY1,
+@copy_recipients=@EMAILIDS1,
+@BODY_FORMAT = 'HTML' ,@PROFILE_NAME='muthu';
+--select @BODY1
+-------------------------------------------------------
+END
+
+insert into DBADATA_Archive.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+select *,getdate() from DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
+
+END
