@@ -29,5 +29,5 @@ https://www.sqlserverblogforum.com/
 https://www.sqlserverblogforum.com/AutoMon
 
 <u><Strong>Licence </u></Strong>
-MIT link
+https://github.com/muthukkumarankaliyamoorthy/SQL-AutoMon-free-monitoring-tool/blob/master/LICENSE
 
