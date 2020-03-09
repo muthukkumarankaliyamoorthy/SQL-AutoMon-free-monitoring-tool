@@ -50,13 +50,14 @@ drop table DBA_All_servers
 
 CREATE TABLE dbo.DBA_All_servers(
 	id int NOT NULL identity,
-	Servername varchar(50) NOT NULL,ComputerName varchar(50) NOT NULL,Description varchar(50) NOT NULL,Instance varchar(50),Edition varchar(50) NOT NULL,
-	Version varchar(20) NULL,Version_number varchar(20),SP varchar(20),Login_mode varchar(20) NOT NULL,	HA varchar(20),
+	Servername varchar(50) NOT NULL,ComputerName varchar(50) NULL,Description varchar(50) NOT NULL,Instance varchar(50),Edition varchar(50) NOT NULL,
+	Version varchar(20) NULL,Version_number varchar(20),MS_Patch Varchar(20),SP varchar(20),Login_mode varchar(20) NOT NULL,	HA varchar(20),
 	IS_clustered varchar(20),Collation varchar(50),BuildClrVersion varchar(20),Domain varchar(20),
 	OS_version varchar(50),IP varchar(20),IS_VM varchar(20),CPU_logical int,hyperthread_ratio int,
 	CPU_physical int,RAM bigint,Category varchar(20),location varchar(20),Applications varchar(200),
 	Business_owner varchar(200),Critical_service_level varchar(50),Severity varchar(50),SVR_status varchar(20),
 	is_win_A_path varchar (20), Is_SQL_Auto_Path varchar (20), Is_backup varchar(20),Is_monitoring varchar(20),
+	EOL datetime, E_EOL datetime,Patch_compliance varchar(20),
 	License_Detalis varchar(50),comments_1 varchar(20),comments_2 varchar(20),Added_date datetime,Maintenance_date datetime
 
 PRIMARY KEY CLUSTERED 
