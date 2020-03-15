@@ -19,7 +19,7 @@ Download all 30+ scripts. Each script will have own data collection and needs a 
 <br>1_1_2_Add_server_SQL_sever – Add servers into AutoMon system (This also can be done manually by creating linked server and adding the server into the monitoring table DBA_All_servers). I prefer to use dynamic SQL to add all in one-shot.</br>
 <br>https://www.sqlserverblogforum.com/automon/add-server-into-automon-dba-sps-am01/</br>
 <br>Add_Or_Drop_server_Input_parameter_Target – Sample input we need for this scripts to work and tables, SPs needed in the target servers</br>
-<br>For drop: 1_2_Drop_server – This script will drop the server from monitoring tool.</br>
+<br>For drop: 1_2_1_Drop_server_SQL_server – This script will drop the server from monitoring tool.</br>
 <br>https://www.sqlserverblogforum.com/automon/drop-server-into-automon-dba-sps-am02/</br>
 <br>Supported versions from: SQL Server 2005 onwards, some script will have version based ex: 12_0_RAM_Above_SQL2008_New_Agu_2017</br>
 
