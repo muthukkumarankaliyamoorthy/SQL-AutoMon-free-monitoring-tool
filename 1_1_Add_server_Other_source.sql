@@ -1,3 +1,5 @@
+-- Linked server as Other provider - Different name:
+--EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='DBA_LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
 
 use DBAData
 go

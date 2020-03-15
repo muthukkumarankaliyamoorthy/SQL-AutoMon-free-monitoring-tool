@@ -1,3 +1,5 @@
+-- Drop from table and linked server as SQL
+
 
 alter PROCEDURE [dbo].[USP_DBA_DROPSERVER_FOR_MONITOR]
 /*

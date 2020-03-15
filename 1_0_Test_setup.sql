@@ -9,14 +9,78 @@ use DBAData
 go
 create table tbl_SQL_AutoMON
 (
-	Servername varchar(50) NOT NULL,Description varchar(50) NOT NULL,Instance varchar(50),Edition varchar(50) NOT NULL,
-	Version varchar(20) NOT NULL,Version_number varchar(20),SP varchar(20),Login_mode varchar(20) NOT NULL,	HA varchar(20),
-	IS_clustered varchar(20),Collation varchar(50),BuildClrVersion varchar(20),Domain varchar(20),
-	OS_version varchar(50),IP varchar(20),IS_VM varchar(20),CPU_logical int,hyperthread_ratio int,
-	CPU_physical int,RAM bigint,Category varchar(20),location varchar(20),Applications varchar(200),
-	Business_owner varchar(200),Critical_service_level varchar(50),Severity varchar(50),SVR_status varchar(20),
-	is_win_A_path varchar (30), Is_SQL_Auto_Path varchar (30), Is_backup varchar(30),Is_monitoring varchar(30),
-	License_Detalis varchar(50),comments_1 varchar(20),comments_2 varchar(20),Added_date datetime,Maintenance_date datetime
+	[Servername] [varchar](100) NULL,
+	[ComputerNamePhysicalNetBIOS] [varchar](50) NULL,
+	[Instance] [varchar](50) NULL,
+	[Login_mode] [varchar](20) NULL,
+	[Edition] [varchar](100) NULL,
+	[ProductBuild] [varchar](50) NULL,
+	[ProductBuildType] [varchar](50) NULL,
+	[ProductLevel] [varchar](50) NULL,
+	[ProductMajorVersion] [varchar](50) NULL,
+	[ProductMinorVersion] [varchar](50) NULL,
+	[ProductUpdateLevel] [varchar](50) NULL,
+	[ProductUpdateReference] [varchar](50) NULL,
+	[Version] [varchar](50) NULL,
+	[ResourceLastUpdateDateTime] [varchar](50) NULL,
+	[ResourceVersion] [varchar](50) NULL,
+	[MachineName] [varchar](50) NULL,
+	[IsClustered] [varchar](11) NULL,
+	[IsFullTextInstalled] [varchar](50) NULL,
+	[IsHadrEnabled] [varchar](50) NULL,
+	[IsLocalDB] [varchar](50) NULL,
+	[IsPolyBaseInstalled] [varchar](50) NULL,
+	[IsSingleUser] [varchar](50) NULL,
+	[IsXTPSupported] [varchar](50) NULL,
+	[LCID] [varchar](50) NULL,
+	[LicenseType] [varchar](50) NULL,
+	[NumLicenses] [varchar](50) NULL,
+	[ProcessID] [varchar](50) NULL,
+	[SqlCharSet] [varchar](50) NULL,
+	[SqlCharSetName] [varchar](50) NULL,
+	[SqlSortOrder] [varchar](50) NULL,
+	[SqlSortOrderName] [varchar](50) NULL,
+	[FilestreamShareName] [varchar](50) NULL,
+	[FilestreamConfiguredLevel] [varchar](50) NULL,
+	[FilestreamEffectiveLevel] [varchar](50) NULL,
+	[CollationID] [varchar](50) NULL,
+	[ComparisonStyle] [varchar](50) NULL,
+	[EditionID] [varchar](50) NULL,
+	[EngineEdition] [varchar](50) NULL,
+	[HadrManagerStatus] [varchar](50) NULL,
+	[InstanceDefaultDataPath] [varchar](max) NULL,
+	[InstanceDefaultLogPath] [varchar](max) NULL,
+	[IsAdvancedAnalyticsInstalled] [varchar](50) NULL,
+	[net_transport] [varchar](50) NULL,
+	[protocol_type] [varchar](50) NULL,
+	[auth_scheme] [varchar](50) NULL,
+	[IP] [varchar](50) NULL,
+	[local_tcp_port] [varchar](50) NULL,
+	[client_net_address] [varchar](50) NULL,
+	[HA] [varchar](20) NULL,
+	[Domain] [varchar](13) NULL,
+	[OS] [varchar](50) NULL,
+	[server_type] [varchar](20) NULL,
+	[No_of_logical_cpu] [int] NULL,
+	[hyperthread_ratio] [int] NULL,
+	[No_of_physical_cpu] [int] NULL,
+	[physical_memory_kb] [bigint] NULL,
+	[Category] [varchar](20) NULL,
+	[Location] [varchar](20) NULL,
+	[Applications] [varchar](19) NULL,
+	[Business_owner] [varchar](21) NULL,
+	[Critical_service_level] [varchar](29) NULL,
+	[Severity] [varchar](15) NULL,
+	[SVR_status] [varchar](20) NULL,
+	[is_win_A_path] [varchar](20) NULL,
+	[Is_SQL_Auto_Path] [varchar](16) NULL,
+	[Is_backup] [varchar](21) NULL,
+	[Is_monitoring] [varchar](25) NULL,
+	[License_Detalis] [varchar](23) NULL,
+	[comments_1] [varchar](20) NULL,
+	[comments_2] [varchar](20) NULL,
+	[Added_date] [datetime] NULL default (getdate()),
+	[Maintenance_date] [datetime] NULL default (getdate())
 )
 
 BULK INSERT tbl_SQL_AutoMON  FROM 'D:\temp\servers.txt'WITH (FIELDTERMINATOR = '<>',ROWTERMINATOR = '\n')
@@ -50,15 +114,83 @@ drop table DBA_All_servers
 
 CREATE TABLE dbo.DBA_All_servers(
 	id int NOT NULL identity,
-	Servername varchar(50) NOT NULL,ComputerName varchar(50) NULL,Description varchar(50) NOT NULL,Instance varchar(50),Edition varchar(50) NOT NULL,
-	Version varchar(20) NULL,Version_number varchar(20),MS_Patch Varchar(20),SP varchar(20),Login_mode varchar(20) NOT NULL,	HA varchar(20),
-	IS_clustered varchar(20),Collation varchar(50),BuildClrVersion varchar(20),Domain varchar(20),
-	OS_version varchar(50),IP varchar(20),IS_VM varchar(20),CPU_logical int,hyperthread_ratio int,
-	CPU_physical int,RAM bigint,Category varchar(20),location varchar(20),Applications varchar(200),
-	Business_owner varchar(200),Critical_service_level varchar(50),Severity varchar(50),SVR_status varchar(20),
-	is_win_A_path varchar (20), Is_SQL_Auto_Path varchar (20), Is_backup varchar(20),Is_monitoring varchar(20),
-	EOL datetime, E_EOL datetime,Patch_compliance varchar(20),
-	License_Detalis varchar(50),comments_1 varchar(20),comments_2 varchar(20),Added_date datetime,Maintenance_date datetime
+	[Servername] [varchar](100) NOT NULL,
+	[ComputerName] [varchar](100) NULL,
+	[Description] [varchar](100) NOT NULL,
+	[Instance] [varchar](50) NULL,
+	[Login_mode] [varchar](20) NULL,
+	[Edition] [varchar](500) NOT NULL,
+	[ProductBuild] [varchar](50) NULL,
+	[ProductBuildType] [varchar](50) NULL,
+	[ProductLevel] [varchar](50) NULL,
+	[ProductMajorVersion] [varchar](50) NULL,
+	[ProductMinorVersion] [varchar](50) NULL,
+	[ProductUpdateLevel] [varchar](50) NULL,
+	[ProductUpdateReference] [varchar](50) NULL,
+	[Version] [varchar](50) NOT NULL,
+	[ResourceLastUpdateDateTime] [varchar](50) NULL,
+	[ResourceVersion] [varchar](50) NULL,
+	[MachineName] [varchar](50) NULL,
+	[IsClustered] [varchar](11) NULL,
+	[IsFullTextInstalled] [varchar](50) NULL,
+	[IsHadrEnabled] [varchar](50) NULL,
+	[IsLocalDB] [varchar](50) NULL,
+	[IsPolyBaseInstalled] [varchar](50) NULL,
+	[IsSingleUser] [varchar](50) NULL,
+	[IsXTPSupported] [varchar](50) NULL,
+	[LCID] [varchar](50) NULL,
+	[LicenseType] [varchar](50) NULL,
+	[NumLicenses] [varchar](50) NULL,
+	[ProcessID] [varchar](50) NULL,
+	[SqlCharSet] [varchar](50) NULL,
+	[SqlCharSetName] [varchar](50) NULL,
+	[SqlSortOrder] [varchar](50) NULL,
+	[SqlSortOrderName] [varchar](50) NULL,
+	[FilestreamShareName] [varchar](50) NULL,
+	[FilestreamConfiguredLevel] [varchar](50) NULL,
+	[FilestreamEffectiveLevel] [varchar](50) NULL,
+	[CollationID] [varchar](50) NULL,
+	[ComparisonStyle] [varchar](50) NULL,
+	[EditionID] [varchar](50) NULL,
+	[EngineEdition] [varchar](50) NULL,
+	[HadrManagerStatus] [varchar](50) NULL,
+	[InstanceDefaultDataPath] [varchar](max) NULL,
+	[InstanceDefaultLogPath] [varchar](max) NULL,
+	[IsAdvancedAnalyticsInstalled] [varchar](50) NULL,
+	[net_transport] [varchar](50) NULL,
+	[protocol_type] [varchar](50) NULL,
+	[auth_scheme] [varchar](50) NULL,
+	[IP] [varchar](50) NULL,
+	[local_tcp_port] [varchar](50) NULL,
+	[client_net_address] [varchar](50) NULL,
+	[HA] [varchar](20) NULL,
+	[Domain] [varchar](50) NULL,
+	[OS] [varchar](50) NULL,
+	[server_type] [varchar](20) NULL,
+	[No_of_logical_cpu] [int] NULL,
+	[hyperthread_ratio] [int] NULL,
+	[No_of_physical_cpu] [int] NULL,
+	[physical_memory_kb] [bigint] NULL,
+	[Category] [varchar](50) NOT NULL,
+	[Location] [varchar](20) NOT NULL,
+	[Applications] [varchar](max) NULL,
+	[Business_owner] [varchar](max) NULL,
+	[Critical_service_level] [varchar](50) NULL,
+	[Severity] [varchar](50) NULL,
+	[SVR_status] [varchar](20) NOT NULL,
+	[MS_Patch] [varchar](50),
+	[EOL] [Datetime],
+	[E_EOL] [Datetime],
+	[Patch_compliance] [varchar](15),
+	[is_win_A_path] [varchar](20) NULL,
+	[Is_SQL_Auto_Path] [varchar](20) NULL,
+	[Is_backup] [varchar](20) NULL,
+	[Is_monitoring] [varchar](25) NULL,
+	[License_Detalis] [varchar](20) NULL,
+	[comments_1] [varchar](100) NULL,
+	[comments_2] [varchar](100) NULL,
+	[Added_date] [datetime] NULL default (getdate()),
+	[Maintenance_date] [datetime] NULL default (getdate())
 
 PRIMARY KEY CLUSTERED 
 (
@@ -66,17 +198,34 @@ PRIMARY KEY CLUSTERED
 )
 )
 
---Custom Script to add all the servers:
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','''DBA_'+ServerName+''',',''''+ServerName+''',',
-''''+Version+''',',''''+ServerName+''',','''SA'',','''SApassword'',',
-''''+Category+''',','''India'',',''''+Edition+''',','''Running'',',''''+Login_Mode+''''
-from dbo.tbl_SQL_AutoMON where svr_Status <>'Server Not running'
+--Custom Script to add all the servers: SQL linked server
+select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_SERVER=''DBA_'+ServerName+''',','@P_DESC='''+ServerName+''',',
+'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
+'@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
+from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
+
+
+--Custom Script to add all the servers: Other source
+select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_LINK_SERVER=''DBA_'+ServerName+''',@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
+'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
+'@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
+from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
+
 
 --Custom Script to Drop all the servers:
+--Custom Script to drop all the servers: SQL linked server
+select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR',''''+ServerName+''',',
+''''+Version+''',',''''+ServerName+''''
+from dbo.tbl_SQL_AutoMON --where servername like '%ii%'
 
+--Custom Script to drop all the servers: Other source
+
+--Custom Script to Drop all the servers:
+--Custom Script to drop all the servers: SQL linked server
 select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR','''DBA_'+ServerName+''',',''''+ServerName+''',',
 ''''+Version+''',',''''+ServerName+''''
-from dbo.tbl_SQL_AutoMON where servername like '%ii%'
+from dbo.tbl_SQL_AutoMON --where servername like '%ii%'
+
 
 /*
 -- Install Details

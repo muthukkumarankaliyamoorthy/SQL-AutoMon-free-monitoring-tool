@@ -1,3 +1,7 @@
+-- Linked server as SQL:
+--EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
+
+
 
 use DBAData
 go
@@ -15,8 +19,8 @@ Date         Coder							Description
 */
 
 @P_SERVER SYSNAME,
-@P_VERSION SYSNAME,
 @P_DESC VARCHAR(50),
+@P_VERSION SYSNAME,
 @P_USERNAME SYSNAME,
 @P_PWD VARCHAR(100),
 @P_category VARCHAR(100),
