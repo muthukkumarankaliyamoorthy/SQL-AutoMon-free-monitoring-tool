@@ -181,6 +181,7 @@ CREATE TABLE dbo.DBA_All_servers(
 	[MS_Patch] [varchar](50),
 	[EOL] [Datetime],
 	[E_EOL] [Datetime],
+	[OS_EOL] [Datetime],
 	[Patch_compliance] [varchar](15),
 	[is_win_A_path] [varchar](20) NULL,
 	[Is_SQL_Auto_Path] [varchar](20) NULL,
