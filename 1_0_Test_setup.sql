@@ -182,6 +182,8 @@ CREATE TABLE dbo.DBA_All_servers(
 	[EOL] [Datetime],
 	[E_EOL] [Datetime],
 	[OS_EOL] [Datetime],
+	[Esxi_mapping] [varchar](200),
+	[Esxi_hostName] [varchar](200),
 	[Patch_compliance] [varchar](15),
 	[is_win_A_path] [varchar](20) NULL,
 	[Is_SQL_Auto_Path] [varchar](20) NULL,
@@ -200,7 +202,7 @@ PRIMARY KEY CLUSTERED
 )
 
 --Custom Script to add all the servers: SQL linked server
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_SERVER=''DBA_'+ServerName+''',','@P_DESC='''+ServerName+''',',
+select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
 '@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
 '@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
 from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
