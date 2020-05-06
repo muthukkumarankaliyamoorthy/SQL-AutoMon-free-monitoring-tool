@@ -166,6 +166,8 @@ CREATE TABLE dbo.DBA_All_servers(
 	[HA] [varchar](20) NULL,
 	[Domain] [varchar](50) NULL,
 	[OS] [varchar](50) NULL,
+	[SQL_bit] [varchar](50) NULL,
+	[OS_bit] [varchar](50) NULL,
 	[server_type] [varchar](20) NULL,
 	[No_of_logical_cpu] [int] NULL,
 	[hyperthread_ratio] [int] NULL,
@@ -219,15 +221,15 @@ from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
 --Custom Script to drop all the servers: SQL linked server
 select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR',''''+ServerName+''',',
 ''''+Version+''',',''''+ServerName+''''
-from dbo.tbl_SQL_AutoMON --where servername like '%ii%'
+from dbo.DBA_All_servers --where servername like '%ii%'
 
 --Custom Script to drop all the servers: Other source
 
 --Custom Script to Drop all the servers:
 --Custom Script to drop all the servers: SQL linked server
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR','''DBA_'+ServerName+''',',''''+ServerName+''',',
-''''+Version+''',',''''+ServerName+''''
-from dbo.tbl_SQL_AutoMON --where servername like '%ii%'
+select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR',''''+ServerName+''',',''''+ServerName+''',',
+''''+Version+''',',''''+Description+''''
+from dbo.DBA_All_servers --where servername like '%ii%'
 
 
 /*

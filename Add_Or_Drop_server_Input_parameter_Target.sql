@@ -1,21 +1,42 @@
-select* from DBA_All_servers where Description like '%server%'
-
 
 -- add server
 -- CHeck HA
 -- ebnale dac
--- CREATE SP FOR space percentage, make sure Ole Automation Procedures enabled or not, alter the SP accordingly
+-- CREATE SP FOR % SPACE & PERFMON
+-- ADD in Registered server
+-- add in on PeteM table ========================= IP changes need to be update in Backup calander table
+-- ===============================
 
-select @@servername,isnull(serverproperty ('InstanceName'),'Default')as Instance,
-serverproperty('ProductVersion') as Build,serverproperty ('ProductLevel')as SP,
+
+/*Since the SP name is same for both SQL and non SQL linked server, make sure to run either of one
+USP_DBA_ADDSERVER_FOR_MONITOR & USP_DBA_DROPSERVER_FOR_MONITOR*/
+
+-- Add SQL based linked server
+EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
+
+-- Add non SQL based linked server (Other source)
+EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_LINK_SERVER='DBA_LAPTOP-ISGUKEUC\MUTHU',@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windwos'
+
+select * from DBA_All_servers
+
+-- Drop SQL based linked server
+EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
+-- Drop non SQL based linked server (Other source)
+EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
+
+
+select @@SERVERNAME as server,isnull(serverproperty ('InstanceName'),'Default')as Instance,
+serverproperty('ProductVersion') as SQL_Version,serverproperty ('ProductLevel')as SP,
+'Prod' as Category,
 case when serverproperty ('IsIntegratedSecurityOnly')=0 then 'SQL' else 'Windows'end as login_mode,
 serverproperty ('Edition')as edition,
-case when serverproperty ('IsClustered')=0 then 'Stand alone' else 'Clustered'end as IsClustered 
-
-
-EXEC USP_DBA_ADDSERVER_FOR_MONITOR 'DBA_LAPTOP-ISGUKEUC\MUTHU','LAPTOP-ISGUKEUC\MUTHU','SQL2014','LAPTOP-ISGUKEUC\MUTHU','DBA','G0d$peed','Non PROD','UK','Standard Edition (64-bit)','Running','Windows'
-EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'server',	'server',	'SQL2019',	'server'
-
+case when serverproperty ('IsClustered')=0 then 'Stand alone' else 'Clustered'end as IsClustered ,
+serverproperty ('LicenseType') as LicenseType ,
+serverproperty ('Collation') as Collation,
+serverproperty ('BuildClrVersion') as  BuildClrVersion,
+Ltrim (Rtrim (@@version)) as OS_version, 
+'Running' as server_status,
+getdate() as uploaddate
 
 EXEC sp_configure 'remote admin connections', 1;
  GO
