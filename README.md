@@ -5,7 +5,7 @@ It is a centralized monitoring solution and alert triggering by using database m
 
 I suggest to have a dedicated VM or Instance to have this databases, so that it is easy to have firewall opened to DMZ or different subnet servers from one source. I have started using this from 2008, when we have no tool to invest cost and even some places, we will have limited licence and those will monitor only important servers.
 
-<Strong> <u>Benefit of AutoMon</u></Strong>:<br> This will collect the data by linked server and send a consolidated report by email based on the threshold. The archive data can been integrated with SSRS and the report can be pulled to view as graph and trend of last week/month/year data of disk, CPU, RAM etc.</br>
+<Strong> <u>Benefit of AutoMon</u></Strong>:<br> This will collect the data by linked server and send a consolidated report by email based on the threshold. The archive data can be integrated with SSRS and the report can be pulled to view as graph and trend of last week/month/year data of disk, CPU, RAM etc.</br>
 <br>You can write your own customized scripts like send an email which logins are expiring next one week. </br>
 
 For performance related issue, this will give some idea but I recommend to use PerfMon.msc https://www.sqlserverblogforum.com/dba/integrate-ssrs-with-perfmon-dashboard-performance-of-database-graph-using-ssrs-collect-perfmon-and-automate-it-load-to-sql-database-and-generate-reports/
@@ -19,7 +19,7 @@ Download all 30+ scripts. Each script will have own data collection and needs a 
 <br>https://www.sqlserverblogforum.com/dba/dba-automon-configure-database-centralized-management-server-cms/<br>
 <br>1_1_2_Add_server_SQL_sever – Add servers into AutoMon system (This also can be done manually by creating linked server and adding the server into the monitoring table DBA_All_servers). I prefer to use dynamic SQL to add all in one-shot.</br>
 <br>https://www.sqlserverblogforum.com/automon/add-server-into-automon-dba-sps-am01/</br>
-<br>Add_Or_Drop_server_Input_parameter_Target – Sample input we need for this scripts to work and tables, SPs needed in the target servers</br>
+<br>Add_Or_Drop_server_Input_part_1.sql & Add_Or_Drop_server_Input_part_2_on-Target.sql – Sample input we need for this scripts to work and tables, SPs needed in the target servers</br>
 <br>For drop: 1_2_1_Drop_server_SQL_server – This script will drop the server from monitoring tool.</br>
 <br>https://www.sqlserverblogforum.com/automon/drop-server-into-automon-dba-sps-am02/</br>
 <br>Supported versions from: SQL Server 2005 onwards, some script will have version based ex: 12_0_RAM_Above_SQL2008_New_Agu_2017</br>
