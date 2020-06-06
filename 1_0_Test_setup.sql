@@ -1,7 +1,7 @@
 
-select * from tbl_Error_handling
+--select * from tbl_Error_handling
 
-truncate table tbl_Error_handling
+--truncate table tbl_Error_handling
 
 drop table tbl_SQL_AutoMON
 go
@@ -10,127 +10,21 @@ go
 create table tbl_SQL_AutoMON
 (
 	[Servername] [varchar](100) NULL,
-	[ComputerNamePhysicalNetBIOS] [varchar](50) NULL,
+	[ComputerNamePhysicalNetBIOS] [varchar](100) NULL,
 	[Instance] [varchar](50) NULL,
 	[Login_mode] [varchar](20) NULL,
 	[Edition] [varchar](100) NULL,
 	[ProductBuild] [varchar](50) NULL,
 	[ProductBuildType] [varchar](50) NULL,
 	[ProductLevel] [varchar](50) NULL,
-	[ProductMajorVersion] [varchar](50) NULL,
-	[ProductMinorVersion] [varchar](50) NULL,
+	--[ProductMajorVersion] [varchar](50) NULL,
+	--[ProductMinorVersion] [varchar](50) NULL,
 	[ProductUpdateLevel] [varchar](50) NULL,
 	[ProductUpdateReference] [varchar](50) NULL,
 	[Version] [varchar](50) NULL,
 	[ResourceLastUpdateDateTime] [varchar](50) NULL,
 	[ResourceVersion] [varchar](50) NULL,
-	[MachineName] [varchar](50) NULL,
-	[IsClustered] [varchar](11) NULL,
-	[IsFullTextInstalled] [varchar](50) NULL,
-	[IsHadrEnabled] [varchar](50) NULL,
-	[IsLocalDB] [varchar](50) NULL,
-	[IsPolyBaseInstalled] [varchar](50) NULL,
-	[IsSingleUser] [varchar](50) NULL,
-	[IsXTPSupported] [varchar](50) NULL,
-	[LCID] [varchar](50) NULL,
-	[LicenseType] [varchar](50) NULL,
-	[NumLicenses] [varchar](50) NULL,
-	[ProcessID] [varchar](50) NULL,
-	[SqlCharSet] [varchar](50) NULL,
-	[SqlCharSetName] [varchar](50) NULL,
-	[SqlSortOrder] [varchar](50) NULL,
-	[SqlSortOrderName] [varchar](50) NULL,
-	[FilestreamShareName] [varchar](50) NULL,
-	[FilestreamConfiguredLevel] [varchar](50) NULL,
-	[FilestreamEffectiveLevel] [varchar](50) NULL,
-	[CollationID] [varchar](50) NULL,
-	[ComparisonStyle] [varchar](50) NULL,
-	[EditionID] [varchar](50) NULL,
-	[EngineEdition] [varchar](50) NULL,
-	[HadrManagerStatus] [varchar](50) NULL,
-	[InstanceDefaultDataPath] [varchar](max) NULL,
-	[InstanceDefaultLogPath] [varchar](max) NULL,
-	[IsAdvancedAnalyticsInstalled] [varchar](50) NULL,
-	[net_transport] [varchar](50) NULL,
-	[protocol_type] [varchar](50) NULL,
-	[auth_scheme] [varchar](50) NULL,
-	[IP] [varchar](50) NULL,
-	[local_tcp_port] [varchar](50) NULL,
-	[client_net_address] [varchar](50) NULL,
-	[HA] [varchar](20) NULL,
-	[Domain] [varchar](13) NULL,
-	[OS] [varchar](50) NULL,
-	[server_type] [varchar](20) NULL,
-	[No_of_logical_cpu] [int] NULL,
-	[hyperthread_ratio] [int] NULL,
-	[No_of_physical_cpu] [int] NULL,
-	[physical_memory_kb] [bigint] NULL,
-	[Category] [varchar](20) NULL,
-	[Location] [varchar](20) NULL,
-	[Applications] [varchar](19) NULL,
-	[Business_owner] [varchar](21) NULL,
-	[Critical_service_level] [varchar](29) NULL,
-	[Severity] [varchar](15) NULL,
-	[SVR_status] [varchar](20) NULL,
-	[is_win_A_path] [varchar](20) NULL,
-	[Is_SQL_Auto_Path] [varchar](16) NULL,
-	[Is_backup] [varchar](21) NULL,
-	[Is_monitoring] [varchar](25) NULL,
-	[License_Detalis] [varchar](23) NULL,
-	[comments_1] [varchar](20) NULL,
-	[comments_2] [varchar](20) NULL,
-	[Added_date] [datetime] NULL default (getdate()),
-	[Maintenance_date] [datetime] NULL default (getdate())
-)
-
-BULK INSERT tbl_SQL_AutoMON  FROM 'D:\temp\servers.txt'WITH (FIELDTERMINATOR = '<>',ROWTERMINATOR = '\n')
-
-select Servername,COUNT(*) from dbo. tbl_SQL_AutoMON group by Servername having COUNT(*) >1
-
--- select * from tbl_SQL_AutoMON
-
-select version from tbl_SQL_AutoMON group by version
-update tbl_SQL_AutoMON set version   ='SQL2000' where version like '8%'
-update tbl_SQL_AutoMON set version   ='SQL2005' where version like '9%'
-update tbl_SQL_AutoMON set version   ='SQL2008' where version like '10.0%'
-update tbl_SQL_AutoMON set version   ='SQL2008R2' where version like '10.5%'
-update tbl_SQL_AutoMON set version   ='SQL2012' where version like '11%'
-update tbl_SQL_AutoMON set version   ='SQL2014' where version like '12%'
-update tbl_SQL_AutoMON set version   ='SQL2016' where version like '13%'
-update tbl_SQL_AutoMON set version   ='SQL2017' where version like '14%'
-update tbl_SQL_AutoMON set version   ='SQL2019' where version like '15%'
-
--- update category
-
-UPDATE tbl_SQL_AutoMON set category ='Non-Prod' where servername not like '%ip%'
-
-select * from tbl_SQL_AutoMON
-select * from DBA_All_servers
-
-
-use DBAData
-go
-drop table DBA_All_servers
-
-CREATE TABLE dbo.DBA_All_servers(
-	id int NOT NULL identity,
-	[Servername] [varchar](100) NOT NULL,
-	[ComputerName] [varchar](100) NULL,
-	[Description] [varchar](100) NOT NULL,
-	[Instance] [varchar](50) NULL,
-	[Login_mode] [varchar](20) NULL,
-	[Edition] [varchar](500) NOT NULL,
-	[ProductBuild] [varchar](50) NULL,
-	[ProductBuildType] [varchar](50) NULL,
-	[ProductLevel] [varchar](50) NULL,
-	[ProductMajorVersion] [varchar](50) NULL,
-	[ProductMinorVersion] [varchar](50) NULL,
-	[ProductUpdateLevel] [varchar](50) NULL,
-	[ProductUpdateReference] [varchar](50) NULL,
-	[Version] [varchar](50) NOT NULL,
-	[ResourceLastUpdateDateTime] [varchar](50) NULL,
-	[ResourceVersion] [varchar](50) NULL,
-	[MachineName] [varchar](50) NULL,
+	[MachineName] [varchar](100) NULL,
 	[IsClustered] [varchar](11) NULL,
 	[IsFullTextInstalled] [varchar](50) NULL,
 	[IsHadrEnabled] [varchar](50) NULL,
@@ -166,9 +60,115 @@ CREATE TABLE dbo.DBA_All_servers(
 	[HA] [varchar](20) NULL,
 	[Domain] [varchar](50) NULL,
 	[OS] [varchar](50) NULL,
+	[server_type] [varchar](20) NULL,
+	[No_of_logical_cpu] [int] NULL,
+	[hyperthread_ratio] [int] NULL,
+	[No_of_physical_cpu] [int] NULL,
+	[physical_memory_kb] [bigint] NULL,
+	[Category] [varchar](20) NULL,
+	[Location] [varchar](50) NULL,
+	[Applications] [varchar](100) NULL,
+	[Business_owner] [varchar](100) NULL,
+	[Critical_service_level] [varchar](50) NULL,
+	[Severity] [varchar](50) NULL,
+	[SVR_status] [varchar](20) NULL,
+	[is_win_A_path] [varchar](50) NULL,
+	[Is_SQL_Auto_Path] [varchar](50) NULL,
+	[Is_backup] [varchar](50) NULL,
+	[Is_monitoring] [varchar](50) NULL,
+	[License_Detalis] [varchar](23) NULL,
+	[comments_1] [varchar](100) NULL,
+	[comments_2] [varchar](100) NULL,
+	[Added_date] [datetime] NULL default (getdate()),
+	[Maintenance_date] [datetime] NULL default (getdate())
+)
+
+BULK INSERT tbl_SQL_AutoMON  FROM 'D:\temp\servers.txt'WITH (FIELDTERMINATOR = '<>',ROWTERMINATOR = '\n')
+
+select Servername,COUNT(*) from dbo. tbl_SQL_AutoMON group by Servername having COUNT(*) >1
+
+-- select * from tbl_SQL_AutoMON
+
+select version from tbl_SQL_AutoMON group by version
+update tbl_SQL_AutoMON set version   ='SQL2000' where version like '8%'
+update tbl_SQL_AutoMON set version   ='SQL2005' where version like '9%'
+update tbl_SQL_AutoMON set version   ='SQL2008' where version like '10.0%'
+update tbl_SQL_AutoMON set version   ='SQL2008R2' where version like '10.5%'
+update tbl_SQL_AutoMON set version   ='SQL2012' where version like '11%'
+update tbl_SQL_AutoMON set version   ='SQL2014' where version like '12%'
+update tbl_SQL_AutoMON set version   ='SQL2016' where version like '13%'
+update tbl_SQL_AutoMON set version   ='SQL2017' where version like '14%'
+update tbl_SQL_AutoMON set version   ='SQL2019' where version like '15%'
+
+-- update category
+
+UPDATE tbl_SQL_AutoMON set category ='Non-Prod' where servername not like '%ip%'
+
+select * from tbl_SQL_AutoMON
+--select * from DBA_All_servers
+
+
+use DBAData
+go
+drop table DBA_All_servers
+
+CREATE TABLE dbo.DBA_All_servers(
+	id int NOT NULL identity,
+	[Servername] [varchar](100) NOT NULL,
+	[Computer_Name] [varchar](100) NULL,
+	[Description] [varchar](100) NOT NULL,
+	[Instance] [varchar](50) NULL,
+	[Login_mode] [varchar](20) NULL,
+	[Edition] [varchar](500) NOT NULL,
+	[ProductBuild] [varchar](50) NULL,
+	[ProductBuildType] [varchar](50) NULL,
+	[SP] [varchar](50) NULL,
+	--[ProductMajorVersion] [varchar](50) NULL,
+	--[ProductMinorVersion] [varchar](50) NULL,
+	[ProductUpdateLevel] [varchar](50) NULL,
+	[ProductUpdateReference] [varchar](50) NULL,
+	[Version] [varchar](50) NOT NULL,
+	[ResourceLastUpdateDateTime] [varchar](50) NULL,
+	[ResourceVersion] [varchar](50) NULL,
+	[MachineName] [varchar](100) NULL,
+	[IsClustered] [varchar](11) NULL,
+	[IsFullTextInstalled] [varchar](50) NULL,
+	[IsHadrEnabled] [varchar](50) NULL,
+	[IsLocalDB] [varchar](50) NULL,
+	[IsPolyBaseInstalled] [varchar](50) NULL,
+	[IsSingleUser] [varchar](50) NULL,
+	[IsXTPSupported] [varchar](50) NULL,
+	[LCID] [varchar](50) NULL,
+	[LicenseType] [varchar](50) NULL,
+	[NumLicenses] [varchar](50) NULL,
+	[ProcessID] [varchar](50) NULL,
+	[SqlCharSet] [varchar](50) NULL,
+	[SqlCharSetName] [varchar](50) NULL,
+	[SqlSortOrder] [varchar](50) NULL,
+	[SqlSortOrderName] [varchar](50) NULL,
+	[FilestreamShareName] [varchar](50) NULL,
+	[FilestreamConfiguredLevel] [varchar](50) NULL,
+	[FilestreamEffectiveLevel] [varchar](50) NULL,
+	[CollationID] [varchar](50) NULL,
+	[ComparisonStyle] [varchar](50) NULL,
+	[EditionID] [varchar](50) NULL,
+	[EngineEdition] [varchar](50) NULL,
+	[HadrManagerStatus] [varchar](50) NULL,
+	[InstanceDefaultDataPath] [varchar](max) NULL,
+	[InstanceDefaultLogPath] [varchar](max) NULL,
+	[IsAdvancedAnalyticsInstalled] [varchar](50) NULL,
+	[net_transport] [varchar](50) NULL,
+	[protocol_type] [varchar](50) NULL,
+	[auth_scheme] [varchar](50) NULL,
+	[IP] [varchar](50) NULL,
+	[local_tcp_port] [varchar](50) NULL,
+	[client_net_address] [varchar](50) NULL,
+	[HA] [varchar](50) NULL,
+	[Domain] [varchar](50) NULL,
+	[OS] [varchar](50) NULL,
 	[SQL_bit] [varchar](50) NULL,
 	[OS_bit] [varchar](50) NULL,
-	[server_type] [varchar](20) NULL,
+	[Is_VM] [varchar](20) NULL,
 	[No_of_logical_cpu] [int] NULL,
 	[hyperthread_ratio] [int] NULL,
 	[No_of_physical_cpu] [int] NULL,
@@ -187,11 +187,16 @@ CREATE TABLE dbo.DBA_All_servers(
 	[Esxi_mapping] [varchar](200),
 	[Esxi_hostName] [varchar](200),
 	[Patch_compliance] [varchar](15),
-	[is_win_A_path] [varchar](20) NULL,
-	[Is_SQL_Auto_Path] [varchar](20) NULL,
-	[Is_backup] [varchar](20) NULL,
+	[is_win_A_path] [varchar](50) NULL,
+	[Is_SQL_Auto_Path] [varchar](50) NULL,
+	[Patch_Software]  [varchar](50),
+	[Is_server_backup] [varchar](20) NULL,
+	[Is_DB_level_Backup] [varchar](20) NULL,
 	[Is_monitoring] [varchar](25) NULL,
 	[License_Detalis] [varchar](20) NULL,
+	[CR_new_Build] [varchar](50) NULL,
+	[CR_Decom_build] [varchar](50) NULL,
+	[Install_date] Datetime null,
 	[comments_1] [varchar](100) NULL,
 	[comments_2] [varchar](100) NULL,
 	[Added_date] [datetime] NULL default (getdate()),
