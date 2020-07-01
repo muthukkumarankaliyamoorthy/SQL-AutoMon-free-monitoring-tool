@@ -5,7 +5,7 @@ It is a centralized monitoring solution and alert triggering by using database m
 
 I suggest to have a dedicated VM or Instance to have this databases, so that it is easy to have firewall opened to DMZ or different subnet servers from one source. I have started using this from 2008, when we have no tool to invest cost and even some places, we will have limited licence and those will monitor only important servers.
 
-<Strong> <u>Benefit of AutoMon</u></Strong>:<br> This will collect the data by linked server and send a consolidated report by email based on the threshold. The archive data can be integrated with SSRS and the report can be pulled to view as graph and trend of last week/month/year data of disk, CPU, RAM etc.</br>
+<Strong> <u>Benefit of AutoMon</u></Strong>:<br> This will collect the data by linked server and send a consolidated report by email based on the threshold. The archive data can be integrated with SSRS and the report can be pulled to view as graph and trend of last week/month/year data of disk, CPU, RAM and capacity planning data growth etc.</br>
 <br>You can write your own customized scripts like send an email which logins are expiring next one week. </br>
 
 For performance related issue, this will give some idea but I recommend to use PerfMon.msc https://www.sqlserverblogforum.com/dba/integrate-ssrs-with-perfmon-dashboard-performance-of-database-graph-using-ssrs-collect-perfmon-and-automate-it-load-to-sql-database-and-generate-reports/
