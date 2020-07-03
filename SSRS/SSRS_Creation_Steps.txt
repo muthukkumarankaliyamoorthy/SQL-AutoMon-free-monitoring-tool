@@ -1,0 +1,62 @@
+==============
+1.
+Create a new Project --> Report --> Add item
+
+Creata a new shared data source
+(One text box for title) 
+
+Creata a new shared data sets
+(Create excel for report by using the shared Dsource)
+
+Add a expression for 'not running server'
+create one excel in the data set
+colour the headingls
+click column status and go to the font --> expression-->
+
+= iif(
+
+click fields status and type = "cannot ping","Red","Green")
+
+ex: = iif(Fields!Status.Value= "cannot ping","Red","Green")
+
+-------
+2.
+Underline the server column
+
+Create an SP for the disk space and pass a servername as a parameter
+
+Add another one report and create excel
+click Dsource use the existing/create shared data source and
+use/create the emebeded data set and pass the created SP and refersh the fields and drag and drop the Drive and Free space.
+
+Create expression for less than 10GB 
+=iif(Fields!FREE_SPACE_IN_MB.Value<="100000","Red","Green")
+
+= iif(Fields!Drive.Value = "C","Red","Green")
+
+text box heading type space details for 
+-->go to server dashboard report and click the server column --> 
+text box property --> Action --> select the report --> add--> server
+
+Click the sepace details text box --> 
+= "Space details for: "& Parameters!servername.Value
+
+
+=============== Space trends
+
+Create a new shared data source point that to DBAdata archive
+Create another one SP for sapce chart
+
+Create another one report for space chart
+
+Create a datasource point that to archive db
+
+Add a emebeded data set and use the chart
+
+Click the SP --> refersh
+
+click and drag the chart --> chart properties
+
+drag the DS drive name to --> series of the group
+
+free space in values

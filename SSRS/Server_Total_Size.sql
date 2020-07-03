@@ -1,0 +1,16 @@
+
+use DBA_Report_Code
+go
+alter procedure [dbo].[Usp_Server_Total_Space]
+--(@Server varchar(500),@Drive varchar(10))
+as
+begin
+
+SELECT TOP 10 SUM(TOTAL_SPACE_IN_MB/1024/1024.0) AS SERVER_TOTAL_SIZE_TB,SERVER_NAME FROM 
+DBADATA.[DBO].[DBA_ALL_SERVER_SPACE_PERCENTAGE]
+--WHERE SERVER_NAME ='Server'
+GROUP BY SERVER_NAME
+ORDER BY SERVER_TOTAL_SIZE_TB DESC
+
+end
+

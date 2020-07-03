@@ -1,0 +1,79 @@
+--warning Update-DbaInstance Update failed: Update failed with exit code -2146233088
+
+# 1. Change the patch and name of each run D:\Source\SQL_Patch\CU_info.html
+# 2. Change the query: Namelevel like '%2014%' & and P.servername not like '%server name%'
+# 3. Check the path, make sure the file is exists : $patch_path ="\\share\SQL Service Pack All versions\SQL2014\"
+# 4. Change the version name $version = '2014SP3'
+# 5. Make sure PS version on remote server is above 3.0 and remoting Enable-PSRemoting with port opened 5985
+
+
+#Update the Build Reference so DBATOOLS is aware of the latest SP/CU versions
+#Set the versions to whatever version you're using
+#Get-DbaBuildReference -MajorVersion 2016 -ServicePack 7 -Update # find the patch level
+
+#create a list of servers that you want to patch
+#$ServerList = 'server name',''
+
+
+
+$ServerList = Invoke-DbaQuery -SqlInstance "server name" -Query "select P.servername FROM SQLPatch_EOL P
+join DBADATA.DBO.DBA_ALL_SERVERS D on P.servername=D.Description
+join DBADATA.DBO.tbl_SQL_inventory_App PM on D.Description=PM.SQL_full_name
+join DBADATA.DBO.tbl_load_inventory_settings S on PM.SQL_full_name=S.server_name
+JOIN DBADATA.DBO.tbl_OS_version V on S.server_name=V.Servername
+where Namelevel <'2017'
+and splevel<>sptarget
+and D.SP_E_EOL > '2020-04-21'
+and Environment not in ('Production','Live') and Domain not in ('abcd')
+and Namelevel like '%2014%' -- version
+and P.servername not like '%server%'
+order by D.SP_E_EOL" | Select-Object -ExpandProperty servername
+Get-DbaBuildReference   -SqlInstance $ServerList |ConvertTo-Html |out-file "D:\Source\SQL_Patch\CU_info.html"
+
+#$cred set credentail
+$cred = Get-Credential "user name"
+#$User = "user name"
+#$PWord = ConvertTo-SecureString -String 'password' -AsPlainText -Force
+#$cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $PWord
+# set path of patch file
+$patch_path ="\\share\SQL Service Pack All versions\SQL2014\"
+
+#Set the version that you want to update to
+$version = '2014SP3'
+
+#Start Patching! The -Restart option will allow it to restart the SQL Server as needed
+#Update-DbaInstance -ComputerName $ServerList -Path '\\share\SQLServer\2016' -Version $version -Restart -Credential $psCred #-Verbose
+Update-DbaInstance -ComputerName $ServerList -Path $patch_path -Credential $cred -Version $version -Verbose -Restart #-Confirm:$false
+
+
+/*
+$PsSession = New-PSSession -ComputerName "your Instance" -UseSSL
+Invoke-Command -Session $PsSession -Script Block {dir} 
+
+
+winrm qc -- (or winrm quickconfig). Or open an Administrator PowerShell prompt and run:
+
+Enable-PSRemoting
+
+Enter-PSSession -Computername localhost
+Enter-PSSession -Computername server name
+
+
+$PsSession = New-PSSession -ComputerName "your Instance" -UseSSL
+Invoke-Command -Session $PsSession -Script Block {dir} 
+
+
+New-PSSession :  Connecting to remote server server name
+failed with the following error message : The client cannot connect to the destination specified in the request.
+Verify that the service on the destination is running and is accepting requests. Consult the logs and documentation
+for the WS-Management service running on the destination, most commonly IIS or WinRM. If the destination is the WinRM
+service, run the following command on the destination to analyze and configure the WinRM service: "winrm quickconfig".
+For more information, see the about_Remote_Troubleshooting Help topic.
+At line:1 char:14
++ ... PsSession = New-PSSession -ComputerName 
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (System.Manageme....RemoteRunspace:RemoteRunspace) [New-PSSession], PSRemotin
+   gTransportException
+    + FullyQualifiedErrorId : CannotConnect,PSSessionOpenFailed
+PS C:\Windows\system32>
+*/
