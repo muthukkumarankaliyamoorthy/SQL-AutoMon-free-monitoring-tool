@@ -80,7 +80,7 @@ Truncate table dbadata.dbo.tbl_get_datafiles_size_express_edition
  
  insert into @spaceinfo_express
  select Servername , Description   from dbadata.dbo.dba_all_servers 
- WHERE Version <>'SQL2000'  and edition   like'%Express%'
+ WHERE Version <>'SQL2000'  --and edition   like'%Express%'
  AND svr_status ='running'-- 
  
 
@@ -142,7 +142,7 @@ set @minrow =@minrow +1
 -- select * from dbadata.dbo.tbl_get_datafiles_size_express_edition 
 if exists (
 
-select 1 from dbadata.dbo.tbl_get_datafiles_size_express_edition where CURRENTSIZE_MB >8000
+select 1 from dbadata.dbo.tbl_get_datafiles_size_express_edition where CURRENTSIZE_MB >8000 and Edition like '%express%'
 
 )
 
@@ -152,7 +152,7 @@ DECLARE DBfile_CUR CURSOR FOR
 
 SELECT ServerNAME,DBNAME,FILENAME,CURRENTSIZE_MB,USEDSPACE_MB,FREESPACEMB,left(PHYSICAL_NAME,1) as Drive,Edition
 FROM tbl_get_datafiles_size_express_edition 
-where CURRENTSIZE_MB >8000
+where CURRENTSIZE_MB >8000 and Edition like '%express%'
 order by CURRENTSIZE_MB
 
 OPEN DBfile_CUR

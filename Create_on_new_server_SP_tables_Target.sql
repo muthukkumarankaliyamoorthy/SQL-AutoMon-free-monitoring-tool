@@ -5,7 +5,7 @@ go
 select 'EXEC USP_DBA_Create_SP_Table_temp',''''+ServerName+''',',''''+ServerName+''',',
 ''''+Version+''',',''''+ServerName+''',',
 ''''+Category+''',','''location'',',''''+Edition+''',','''Running'',',''''+Login_Mode+''''
-from dbo.DBA_All_servers where svr_Status ='running' and edition   like'%Express%'
+from dbo.DBA_All_servers where svr_Status ='running' -- and edition   like'%Express%'
 
 
 SELECT * FROM dbo.DBA_All_servers
