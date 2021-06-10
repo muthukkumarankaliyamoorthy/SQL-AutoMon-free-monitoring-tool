@@ -108,6 +108,9 @@ select * from tbl_SQL_AutoMON
 --select * from DBA_All_servers
 
 
+/*
+No need to have all columns, only passing parameters in the EXEC USP_DBA_ADDSERVER_FOR_MONITOR SP is fine, but good to have all as long as version supports.
+*/
 use DBAData
 go
 drop table DBA_All_servers

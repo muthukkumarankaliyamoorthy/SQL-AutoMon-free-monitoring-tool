@@ -1,4 +1,12 @@
+
+/*
+Easy way to get table created is, use insert into table name --into tbl_A_temp
+Get script outed and change not null to null
+insert that into tbl_SQL_AutoMON
+*/
+
 --insert into [tbl_A_temp]
+--insert into [tbl_SQL_AutoMON]
 
 select @@SERVERNAME as servername,
 convert (varchar(max), SERVERPROPERTY('ComputerNamePhysicalNetBIOS')) AS [ComputerNamePhysicalNetBIOS],
@@ -61,7 +69,7 @@ cpu_count as [No_of_logical_cpu],
 hyperthread_ratio,
 cpu_count/hyperthread_ratio as [No_of_physical_cpu],
 physical_memory_kb,
-'Prod' as Category,
+'update Category - prod/dev' as Category,
 'update location' as Location,
 'update Applications' as Applications,
 'update Business_owner' as Business_owner,
