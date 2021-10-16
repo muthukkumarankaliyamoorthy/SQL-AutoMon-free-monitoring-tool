@@ -29,6 +29,14 @@ CREATE TABLE [dbo].[DBA_All_Server_Space_percentage](
 
 */
 
+WARNING: It needs Ole Automation Procedures, enable and disable (OR) permanently enable if it already enabled or needed to be enabled for any applications.
+
+If you are using SQL 2000, you will get an error for enabling Ole Automation Procedures. But as long as it installed it will work. Just the table if it is installed or not -- SELECT * FROM master.dbo.sysobjects WHERE name LIKE '%sp_OA%' AND xtype = 'X'
+
+Server: Msg 15123, Level 16, State 1, Procedure sp_configure, Line 78
+The configuration option 'Ole Automation Procedures' does not exist, or it may be an advanced option.
+
+
 --DROP PROC [USP_DBA_GETSERVERSPACE_percentage]
 -- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE_percentage] @P_Precentage_free= 10 -- less than 10 % alert
 USE DBAdata
