@@ -21,6 +21,7 @@ convert (varchar(max),SERVERPROPERTY('ProductLevel')) AS [ProductLevel],
 convert (varchar(max),SERVERPROPERTY('ProductUpdateLevel')) AS [ProductUpdateLevel], 
 convert (varchar(max),SERVERPROPERTY('ProductUpdateReference')) AS [ProductUpdateReference], 
 convert (varchar(max),SERVERPROPERTY('ProductVersion')) AS [ProductVersion], 
+convert (varchar(max),SERVERPROPERTY('ProductVersion')) AS [Version_Number], 
 convert (varchar(max),SERVERPROPERTY('ResourceLastUpdateDateTime')) AS [ResourceLastUpdateDateTime], 
 convert (varchar(max),SERVERPROPERTY('ResourceVersion')) AS [ResourceVersion], 
 

@@ -14,11 +14,12 @@ update D set D.Edition=A.Edition	from tbl_SQL_AutoMON A join DBA_All_servers D o
 update D set D.ProductBuild=A.ProductBuild	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.ProductBuildType=A.ProductBuildType	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.SP=A.ProductLevel	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.ProductMajorVersion=A.ProductMajorVersion	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.ProductMinorVersion=A.ProductMinorVersion	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+--update D set D.ProductMajorVersion=A.ProductMajorVersion	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+--update D set D.ProductMinorVersion=A.ProductMinorVersion	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.ProductUpdateLevel=A.ProductUpdateLevel	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.ProductUpdateReference=A.ProductUpdateReference	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.Version=A.Version	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.Version_number=A.Version_number	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 
 update D set D.ResourceLastUpdateDateTime=A.ResourceLastUpdateDateTime	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.ResourceVersion=A.ResourceVersion	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
@@ -61,11 +62,10 @@ update D set D.HA=A.HA	from tbl_SQL_AutoMON A join DBA_All_servers D on A.Server
 update D set D.Domain=A.Domain	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.OS=A.OS	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.is_VM=A.server_type	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.SQL_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.OS_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+--update D set D.SQL_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+--update D set D.OS_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.hyperthread_ratio=A.hyperthread_ratio	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.[No_of_logical_cpu]=A.[No_of_logical_cpu]	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.No_of_physical_cpu=A.No_of_physical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.[physical_memory_kb]=A.physical_memory_kb	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.No_of_physical_cpu=A.No_of_physical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 

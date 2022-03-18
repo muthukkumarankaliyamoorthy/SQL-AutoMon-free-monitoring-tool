@@ -131,7 +131,7 @@ CREATE TABLE dbo.DBA_All_servers(
 	[ProductUpdateLevel] [varchar](50) NULL,
 	[ProductUpdateReference] [varchar](50) NULL,
 	[Version] [varchar](50) NOT NULL,
-	[Version_Number] [varchar](50) NOT NULL,
+	[Version_Number] [varchar](50) NULL,
 	[ResourceLastUpdateDateTime] [varchar](50) NULL,
 	[ResourceVersion] [varchar](50) NULL,
 	[MachineName] [varchar](100) NULL,
