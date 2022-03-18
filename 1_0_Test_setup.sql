@@ -131,6 +131,7 @@ CREATE TABLE dbo.DBA_All_servers(
 	[ProductUpdateLevel] [varchar](50) NULL,
 	[ProductUpdateReference] [varchar](50) NULL,
 	[Version] [varchar](50) NOT NULL,
+	[Version_Number] [varchar](50) NOT NULL,
 	[ResourceLastUpdateDateTime] [varchar](50) NULL,
 	[ResourceVersion] [varchar](50) NULL,
 	[MachineName] [varchar](100) NULL,
@@ -196,12 +197,12 @@ CREATE TABLE dbo.DBA_All_servers(
 	[Is_server_backup] [varchar](20) NULL,
 	[Is_DB_level_Backup] [varchar](20) NULL,
 	[Is_monitoring] [varchar](25) NULL,
-	[License_Detalis] [varchar](20) NULL,
+	[License_Detalis] [varchar](2000) NULL,
 	[CR_new_Build] [varchar](50) NULL,
 	[CR_Decom_build] [varchar](50) NULL,
 	[Install_date] Datetime null,
-	[comments_1] [varchar](100) NULL,
-	[comments_2] [varchar](100) NULL,
+	[comments_1] [varchar](2000) NULL,
+	[comments_2] [varchar](2000) NULL,
 	[Added_date] [datetime] NULL default (getdate()),
 	[Maintenance_date] [datetime] NULL default (getdate())
 

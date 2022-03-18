@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[DBA_All_Server_Space](
 */
 
 -- DROP PROC [USP_DBA_GETSERVERSPACE]
--- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] @Free_Space_threshold = 25 -- less than 25600 MB alert
+-- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] @Free_Space_threshold = 10000 -- less than 10000 MB alert
 USE DBAdata
 GO
 alter PROCEDURE [dbo].[USP_DBA_GETSERVERSPACE]

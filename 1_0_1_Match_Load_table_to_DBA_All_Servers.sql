@@ -60,13 +60,15 @@ update D set D.client_net_address=A.client_net_address	from tbl_SQL_AutoMON A jo
 update D set D.HA=A.HA	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.Domain=A.Domain	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.OS=A.OS	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.SQL_bit=A.server_type	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.OS_bit=A.No_of_logical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.Is_VM=A.hyperthread_ratio	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.No_of_logical_cpu=A.No_of_physical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.hyperthread_ratio=A.physical_memory_kb	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.is_VM=A.server_type	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.SQL_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.OS_bit=A.	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.hyperthread_ratio=A.hyperthread_ratio	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.[No_of_logical_cpu]=A.[No_of_logical_cpu]	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
 update D set D.No_of_physical_cpu=A.No_of_physical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
-update D set D.physical_memory_kb=A.physical_memory_kb	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.[physical_memory_kb]=A.physical_memory_kb	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+update D set D.No_of_physical_cpu=A.No_of_physical_cpu	from tbl_SQL_AutoMON A join DBA_All_servers D on A.ServerName=D.Description
+
 
 -- Need manual update
 
