@@ -1,6 +1,6 @@
 
--- add server
--- CHeck HA, for failover cluster add in comments
+-- add server by running 1_0_1_CMS.sql on target and collect data and paste over it
+-- Check HA, for failover cluster add in comments
 -- ebnale dac
 -- ADD in Registered server
 -- add in on AppownerTable table ========================= IP changes need to be update in Backup calander table
@@ -28,18 +28,7 @@ EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'DBA_LAPTOP-ISG
 
 select Added_date,* FROM DBADATA.DBO.DBA_ALL_SERVERS where Description like '%ServerName.FQDN%'
 
-select @@SERVERNAME as server,isnull(serverproperty ('InstanceName'),'Default')as Instance,
-serverproperty('ProductVersion') as SQL_Version,serverproperty ('ProductLevel')as SP,SERVERPROPERTY('ProductUpdateLevel') AS [ProductUpdateLevel],
-'Prod' as Category,
-case when serverproperty ('IsIntegratedSecurityOnly')=0 then 'SQL' else 'Windows'end as login_mode,
-serverproperty ('Edition')as edition,
-case when serverproperty ('IsClustered')=0 then 'Stand alone' else 'Clustered'end as IsClustered ,
-serverproperty ('LicenseType') as LicenseType ,
-serverproperty ('Collation') as Collation,
-serverproperty ('BuildClrVersion') as  BuildClrVersion,
-Ltrim (Rtrim (@@version)) as OS_version, 
-'Running' as server_status,
-getdate() as uploaddate
+-- Run 1_0_1_CMS.sql on target and collect data and paste over it
 
 SELECT create_date FROM sys.server_principals WHERE sid = 0x010100000000000512000000
 --=============================== Replace the server name
@@ -71,7 +60,7 @@ select * from tbl_SQL_inventory_AppownerTable
 
 
 
-   -- 5 tables 
+   -- Update columns where is needed and possible 
  select * FROM DBADATA.DBO.DBA_ALL_SERVERS WHERE Description LIKE 'ServerName.domain' 
  --UPDATE DBADATA.DBO.DBA_ALL_SERVERS SET location='Location' WHERE Description LIKE 'ServerName.domain' 
  --UPDATE DBADATA.DBO.DBA_ALL_SERVERS SET domain='Domain name' WHERE Description LIKE 'ServerName.domain' 
