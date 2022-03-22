@@ -261,7 +261,7 @@ DROP TABLE #tbl
 --SELECT * FROM dbadata.dbo.tbl_memory_usgae
 IF EXISTS (
 SELECT * FROM dbadata.dbo.tbl_memory_usgae_2012_New
-where @P_PLE <300
+where PLE<=@P_PLE
 ) 
 begin
 
@@ -269,7 +269,7 @@ DECLARE SPACECUR CURSOR FOR
 
 SELECT servername,Physical_Ram_Use_mB,Physical_ram_Available_mB,PLE
 FROM dbadata.dbo.tbl_memory_usgae_2012_New 
-where @P_PLE <=300
+where PLE<=@P_PLE
 
 OPEN SPACECUR
 FETCH NEXT FROM SPACECUR

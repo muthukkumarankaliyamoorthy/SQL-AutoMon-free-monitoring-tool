@@ -13,7 +13,7 @@ drop table tbl_recovery_model_non_Prod
 CREATE TABLE [dbo].[tbl_recovery_model_non_Prod](
 	[SERVER_NAME] [sysname] NOT NULL,
 	[DB_NAME] [sysname] NOT NULL,
-	[Recovery] [varchar](10) NULL
+	[Recovery] [varchar](100) NULL
 	
 	)
 
@@ -22,7 +22,7 @@ GO
 	CREATE TABLE [dbo].[tbl_recovery_model_non_Prod](
 	[SERVER_NAME] [sysname] NOT NULL,
 	[DB_NAME] [sysname] NOT NULL,
-	[Recovery] [varchar](10) NULL,
+	[Recovery] [varchar](100) NULL,
 	[CREATE_DATE] [datetime] NULL
 
 	)

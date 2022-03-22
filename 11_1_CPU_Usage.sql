@@ -35,7 +35,7 @@ CREATE TABLE [dbo].[tbl_CPU_usgae](
 -- Exec DBAdata.[dbo].[Usp_CPU_alert] @SQL_CPU_utilization = 90, @other_process = 90
 use dbadata
 go
-alter proc [dbo].[Usp_CPU_alert]
+create proc [dbo].[Usp_CPU_alert]
 /*
 Summary:     CPU Utilization findings
 Contact:     Muthukkumaran Kaliyamoorthy SQL DBA
@@ -200,14 +200,14 @@ end
 --SELECT * FROM dbadata.dbo.tbl_memory_usgae
 IF EXISTS (
 SELECT * FROM dbadata.dbo.tbl_CPU_usgae
-where (@SQL_CPU_utilization>90) OR (@other_process>90)
+where (SQL_CPU_utilization>@SQL_CPU_utilization) OR (other_process>@other_process)
 ) 
 begin
 
 DECLARE SPACECUR CURSOR FOR
 
 SELECT servername,SQL_CPU_utilization,Idel,other_process FROM dbadata.dbo.tbl_CPU_usgae
-where (@SQL_CPU_utilization>90) OR (@other_process>90)
+where (SQL_CPU_utilization>@SQL_CPU_utilization) OR (other_process>@other_process)
 
 OPEN SPACECUR
 FETCH NEXT FROM SPACECUR

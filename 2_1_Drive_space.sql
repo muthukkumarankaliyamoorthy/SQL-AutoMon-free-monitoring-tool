@@ -135,30 +135,35 @@ DROP TABLE #TEMPSPACE
 DECLARE @SERVERNAME VARCHAR(500)
 DECLARE @DRIVE VARCHAR(200)
 DECLARE @SPACE VARCHAR(200)
+DECLARE @Precentage VARCHAR(200)
 
 if exists 
 (
-select 1 from dbadata.dbo.DBA_ALL_SERVER_SPACE 
+SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB FROM [DBA_ALL_SERVER_SPACE] A
+join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
 where ( 
-  (FREE_SPACE_IN_MB<@Free_Space_threshold AND DRIVE NOT IN ('Q','P'))
+  (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P'))
 )
+and p.Precentage_free<11
 
 )
 begin
 
 DECLARE SPACECUR CURSOR FOR
 
-SELECT SERVER_NAME,DRIVE, FREE_SPACE_IN_MB FROM [DBA_ALL_SERVER_SPACE]
+SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB FROM [DBA_ALL_SERVER_SPACE] A
+join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
 where ( 
-  (FREE_SPACE_IN_MB<@Free_Space_threshold AND DRIVE NOT IN ('Q','P'))
+  (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P'))
 )
+and p.Precentage_free<11
 --and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
 order by SERVER_NAME
 
 OPEN SPACECUR
 
 FETCH NEXT FROM SPACECUR
-INTO @SERVERNAME,@DRIVE,@SPACE
+INTO @SERVERNAME,@DRIVE,@SPACE,@Precentage
 
 DECLARE @BODY1 VARCHAR(max)
 SET @BODY1=  '<font size=2 color=#C35817  face=''verdana''><B>FOLLOWINGS ARE LOW DISK SPACE INFO FOR PROD SERVERS:</b> </font>
@@ -168,21 +173,22 @@ SET @BODY1=  '<font size=2 color=#C35817  face=''verdana''><B>FOLLOWINGS ARE LOW
  <b>  <tr bgcolor=#8A4117 align=center style="color:#FFFFFF;font-weight:bold"> 
  <td width=350 color=white>SERVER</td> 
  <td width=150 color=white>DRIVE</td>  
-<td width=150 color=white>SPACE MB</td>  </b>  
+ <td width=150 color=white>SPACE MB</td> 
+<td width=150 color=white>PRECENTAGE</td>  </b>  
 
  </tr>'
 WHILE @@FETCH_STATUS=0
 BEGIN
 SET @BODY1= @BODY1 +'<tr>
 <td>'+ISNULL(@SERVERNAME,'&nbsp')+'</td>'+
-'<td align=center>'+ISNULL(@DRIVE+':','&nbsp')+'</td>'
-+
-case when @SPACE< 1024 then '<td align=center style="color:#FF0000;font-weight:bold">'+ISNULL(@SPACE,'&nbsp')+'</td>'
-else '<td align=center >'+ISNULL(@SPACE,'&nbsp')+'</td>' end
+'<td align=center>'+ISNULL(@DRIVE+':','&nbsp')+'</td>'+
+'<td align=center>'+ISNULL(@SPACE+':','&nbsp')+'</td>'+
+case when @Precentage< 10 then '<td align=center style="color:#FF0000;font-weight:bold">'+ISNULL(@Precentage,'&nbsp')+'</td>'
+else '<td align=center >'+ISNULL(@Precentage,'&nbsp')+'</td>' end
 
 
 FETCH NEXT FROM SPACECUR
-INTO @SERVERNAME,@DRIVE,@SPACE
+INTO @SERVERNAME,@DRIVE,@SPACE,@Precentage
 END
 SET @BODY1=@BODY1+'</Table> </p>
 <p>
