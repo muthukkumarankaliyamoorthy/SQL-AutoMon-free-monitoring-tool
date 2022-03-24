@@ -209,7 +209,7 @@ FOR
 
 SELECT SERVERNAME,	[DESCRIPTION] FROM DBADATA.DBO.DBA_ALL_SERVERS
 WHERE  svr_status ='running'
-and Version not in ('SQL2000')
+--and Version not in ('SQL2000')
 
 OPEN ALLSERVER_percentage
 FETCH NEXT FROM ALLSERVER_percentage INTO @SERVER_NAME,@DESC
