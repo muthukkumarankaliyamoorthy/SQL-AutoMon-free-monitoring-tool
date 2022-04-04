@@ -156,8 +156,9 @@ join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
 where ( 
   (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P'))
 )
-and p.Precentage_free<11
+and p.Precentage_free<15
 --and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
+group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB
 order by SERVER_NAME
 
 OPEN SPACECUR
@@ -173,7 +174,7 @@ SET @BODY1=  '<font size=2 color=#C35817  face=''verdana''><B>FOLLOWINGS ARE LOW
  <b>  <tr bgcolor=#8A4117 align=center style="color:#FFFFFF;font-weight:bold"> 
  <td width=350 color=white>SERVER</td> 
  <td width=150 color=white>DRIVE</td>  
- <td width=150 color=white>SPACE MB</td> 
+ <td width=150 color=white>SPACE_MB</td> 
 <td width=150 color=white>PRECENTAGE</td>  </b>  
 
  </tr>'
