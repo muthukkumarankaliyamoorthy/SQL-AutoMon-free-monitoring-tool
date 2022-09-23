@@ -1,0 +1,135 @@
+DB size
+Tablespace size
+Data file  size
+Table size
+Index size
+=================================================== DB Size============
+-- get database size from v$datafile:
+
+select round((sum(bytes)/1024/1024/1024),2) As DBsize from v$datafile;
+
+-- get Oracle database size from dba_data_files:
+select
+"Reserved_Space(MB)", "Reserved_Space(MB)" - "Free_Space(MB)" "Used_Space(MB)","Free_Space(MB)"
+from(
+select
+(select sum(bytes/(1024*1024)) from dba_data_files) "Reserved_Space(MB)",
+(select sum(bytes/(1024*1024)) from dba_free_space) "Free_Space(MB)"
+from dual
+);
+=================================================== Tablespace & Data file============
+
+Freespace
+=========
+
+col TABLESPACE_NAME for a20
+set linesize 140
+
+SELECT fs.tablespace_name TABLESPACE_NAME,df.totalspace TABLESPACE_TOTAL_SIZE,(df.totalspace - fs.freespace) MB_USED,fs.freespace MB_FREE,round(100 * 
+(fs.freespace / df.totalspace),2) PERCENT_FREE FROM (SELECT tablespace_name, ROUND(SUM(bytes) / 1048576) TotalSpace FROM dba_data_files GROUP BY 
+tablespace_name ) df,(SELECT tablespace_name, ROUND(SUM(bytes) / 1048576) FreeSpace FROM dba_free_space GROUP BY tablespace_name ) fs WHERE 
+df.tablespace_name = fs.tablespace_name(+) order by MB_FREE ASC;
+
+--- Data file size
+
+col file_name format a70
+col tablespace_name format a20
+set linesize 150
+set pages 50
+
+
+select a.tablespace_name tablespace_name,substr(file_name,1,70) file_name,
+a.bytes/1024/1024 tot_mb, b.free_mb,trunc((free_mb/a.bytes)*100,2) "%Free"
+from dba_data_files a, (select file_id, sum(bytes)/1024/1024 free_mb from dba_free_space group by file_id) b
+where a.file_id = b.file_id(+) and a.tablespace_name='PSAPSR3USR' order by 1;
+
+===================================================Table size =========
+select OWNER,TABLE_NAME from dba_tables where TABLE_NAME like '%IM_SYSTEM_PARAMETER%';
+
+----
+
+select owner,segment_name,sum(bytes)/1024/1024 as "MBytes" 
+from dba_segments
+where owner='ITROI_IM'
+and segment_name='IM_SYSTEM_PARAMETER'
+group by owner, segment_name;
+
+ITROI_IM	IM_SYSTEM_PARAMETER
+
+===================================================Find index & Index size =========
+
+column table_owner format a15
+column table_name format a20
+column index_name format a20
+column column_name format a20
+
+Select table_owner,table_name,index_name,column_name
+FROM dba_ind_columns
+Where table_owner='ITROI_IM'
+AND table_name='IM_SYSTEM_PARAMETER'
+Order by table_owner, table_name, column_name
+---
+
+SELECT idx.index_name, SUM(bytes)
+  FROM dba_segments seg,
+       dba_indexes  idx
+ WHERE idx.table_owner = 'ITROI_IM'
+   AND idx.table_name  = 'IM_SYSTEM_PARAMETER'
+   AND idx.owner       = seg.owner
+   AND idx.index_name  = seg.segment_name
+ GROUP BY idx.index_name;
+
+----
+select sum(bytes)/1024/1024 "SizeMo"
+from dba_extents
+where segment_name ='SYS_C0079647';
+
+
+
+===================================================Temp tablespace=========
+find tempspace.
+-------------------
+
+select tot.tablespace_name,tot.mb total_mb,tot.mb - nvl(used.blocks, 0) * blk.block_size / 1024 / 1024 free_mb,
+round (nvl (used.blocks, 0) * blk.block_size/1024/1024/tot.mb * 100) pct_used
+from  (select tablespace_name,block_size from   dba_tablespaces where  contents = 'TEMPORARY') blk,
+(select tablespace_name, round (sum (bytes)/1024/1024) mb from   dba_temp_files group by tablespace_name) tot,
+(select tablespace, nvl (sum (blocks), 0) blocks from v$tempseg_usage group by tablespace)
+used where  blk.tablespace_name = tot.tablespace_name and tot.tablespace_name = used.tablespace (+);
+
+
+
+SELECT S.sid || ',' || S.serial# sid_serial, S.username, S.osuser, P.
+spid, S.module,
+P.program, SUM (T.blocks) * TBS.block_size / 1024 / 1024 mb_used, T.tablespace,
+COUNT (*) statements
+FROM v$sort_usage T, v$session S, dba_tablespaces TBS, v$process P
+WHERE T.session_addr = S.saddr
+AND S.paddr = P.addr
+AND T.tablespace = TBS.tablespace_name
+GROUP BY S.sid, S.serial#, S.username, S.osuser, P.spid, S.module,
+P.program, TBS.block_size, T.tablespace
+ORDER BY sid_serial;
+
+===================================================Undo tablespace=========
+find undo space
+-----------------
+
+PSAPUNDO
+
+select total.tablespace_name,
+       total.mb total_mb,
+       used.mb used_mb,
+       round (used.mb / total.mb * 100) pct_used
+from  (select tablespace_name,
+              sum (bytes)/1024/1024 mb
+       from   dba_data_files
+       where  tablespace_name = (select value
+                                 from   v$parameter
+                                 where  name = 'undo_tablespace')
+       group by tablespace_name) total,
+      (select nvl (sum (nvl (used_ublk, 0)), 0)*8192/1024/1024 mb
+       from   v$transaction) used;
+
+---show  parameter undo; will show how long it will keep the modification
+

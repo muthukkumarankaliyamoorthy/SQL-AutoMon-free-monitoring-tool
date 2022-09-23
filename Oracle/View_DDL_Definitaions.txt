@@ -1,0 +1,43 @@
+select dbms_metadata.get_ddl('TABLE','CF_TEST','SYS') from dual;
+select dbms_metadata.get_ddl('INDEX','MGMT_POLICY_ASSOC_CFG_PK_IDX','SYSMAN') from dual;
+select dbms_metadata.get_ddl('VIEW','V_MBN_MY_MAIN','MBO') from dual;
+SELECT dbms_metadata.get_ddl('USER','APSUSR_QA') FROM dual;
+
+
+-- Spool Option
+set heading off;
+set echo off;
+Set pages 999;
+set long 90000;
+
+spool ddl_view_V_MBN_MY_MAIN.sql
+select dbms_metadata.get_ddl('VIEW','V_MBN_MY_MAIN','MBO') from dual;
+spool off;
+
+
+---------------- Find Index names -----------
+select OWNER,INDEX_NAME,INDEX_TYPE,TABLE_NAME,TABLE_TYPE,UNIQUENESS,STATUS from all_indexes where TABLE_NAME like '%CF%'
+
+----
+column table_owner format a15
+column table_name format a20
+column index_name format a20
+column column_name format a20
+
+Select INDEX_OWNER, table_name, index_name, column_name
+FROM dba_ind_columns
+Where INDEX_OWNER='MBO'
+AND table_name='MBN_MY_LIST'
+Order by INDEX_OWNER,table_name, column_name;
+
+------------------ Find table names -----------
+select owner,table_name from all_tables where table_name like '%MBN_MY_LIST%';
+
+
+------------------ Find View names -----------
+select OWNER,VIEW_NAME,VIEW_TYPE from all_views where VIEW_NAME like '%MBN_MY_LIST%';
+
+
+analyze index MBO.MMTL_DASHBOARD_ID validate structure;
+
+select blevel from dba_indexes where index_name ='MMTL_DASHBOARD_ID';

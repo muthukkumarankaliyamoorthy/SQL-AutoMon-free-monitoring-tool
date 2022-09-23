@@ -269,6 +269,9 @@ select 1 from dbadata.dbo.DBA_All_Server_Space_percentage
 where Precentage_free<@P_Precentage_free AND DRIVE NOT IN ('Q','P')
 and (server_name  not in ('abcd','aa','bb\SDSS'))
 and (server_name  <>'xx' and drive <>'Z')
+/*where (drive ='c' and Precentage_free<=10)
+      or (drive !='c' and Precentage_free<20)
+      and not (server='server1' and drive in ('a','b','c','d'))*/
 )
 begin
 

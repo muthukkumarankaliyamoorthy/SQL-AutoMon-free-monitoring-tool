@@ -1,0 +1,1167 @@
+
+
+
+find tempspace.
+-------------------
+
+select tot.tablespace_name,tot.mb total_mb,tot.mb - nvl(used.blocks, 0) * blk.block_size / 1024 / 1024 free_mb,
+round (nvl (used.blocks, 0) * blk.block_size/1024/1024/tot.mb * 100) pct_used
+from  (select tablespace_name,block_size from   dba_tablespaces where  contents = 'TEMPORARY') blk,
+(select tablespace_name, round (sum (bytes)/1024/1024) mb from   dba_temp_files group by tablespace_name) tot,
+(select tablespace, nvl (sum (blocks), 0) blocks from v$tempseg_usage group by tablespace)
+used where  blk.tablespace_name = tot.tablespace_name and tot.tablespace_name = used.tablespace (+);
+
+
+
+SELECT S.sid || ',' || S.serial# sid_serial, S.username, S.osuser, P.
+spid, S.module,
+P.program, SUM (T.blocks) * TBS.block_size / 1024 / 1024 mb_used, T.tablespace,
+COUNT (*) statements
+FROM v$sort_usage T, v$session S, dba_tablespaces TBS, v$process P
+WHERE T.session_addr = S.saddr
+AND S.paddr = P.addr
+AND T.tablespace = TBS.tablespace_name
+GROUP BY S.sid, S.serial#, S.username, S.osuser, P.spid, S.module,
+P.program, TBS.block_size, T.tablespace
+ORDER BY sid_serial;
+
+
+col file_name for a45
+select tablespace_name,file_name,bytes/1024/1024,maxbytes/1024/1024,autoextensible from dba_temp_files  order by file_name;
+
+
+find undo space
+-----------------
+
+PSAPUNDO
+
+select total.tablespace_name,
+       total.mb total_mb,
+       used.mb used_mb,
+       round (used.mb / total.mb * 100) pct_used
+from  (select tablespace_name,
+              sum (bytes)/1024/1024 mb
+       from   dba_data_files
+       where  tablespace_name = (select value
+                                 from   v$parameter
+                                 where  name = 'undo_tablespace')
+       group by tablespace_name) total,
+      (select nvl (sum (nvl (used_ublk, 0)), 0)*8192/1024/1024 mb
+       from   v$transaction) used;
+
+---show  parameter undo; will show how long it will keep the modification
+
+
+Freespace
+=========
+
+set pages 999;
+set long 90000;
+col TABLESPACE_NAME for a20
+set linesize 140
+
+SELECT fs.tablespace_name TABLESPACE_NAME,df.totalspace TABLESPACE_TOTAL_SIZE,(df.totalspace - fs.freespace) MB_USED,fs.freespace MB_FREE,round(100 *
+(fs.freespace / df.totalspace),2) PERCENT_FREE FROM (SELECT tablespace_name, ROUND(SUM(bytes) / 1048576) TotalSpace FROM dba_data_files GROUP BY
+tablespace_name ) df, (SELECT tablespace_name, ROUND(SUM(bytes) / 1048576) FreeSpace FROM dba_free_space GROUP BY tablespace_name ) fs WHERE
+df.tablespace_name = fs.tablespace_name(+) order by TABLESPACE_NAME ASC;
+
+
+Tablespace [MDMDT01] is [91.039 percent] full 
+
+TABLESPACE_NAME      TABLESPACE_TOTAL_SIZE    MB_USED    MB_FREE PERCENT_FREE
+-------------------- --------------------- ---------- ---------- ------------
+MTID01                                 200        169         31         15.5
+REP3DT01                               100         54         46           46
+MTDT01                                 800        580        220         27.5
+JDA_TBS                                500        143        357         71.4
+USERS                                 1024          1       1023         99.9
+REP1DT01                              7168       5468       1700        23.72
+SYSTEM                                5120       3378       1742        34.02
+SYSAUX                                3072       1246       1826        59.44
+CMDB_1_INDEX                         10240       8100       2140         20.9
+ABPPMGR_IO                           30720      26983       3737        12.16
+TS_SNOM_D                            30720      25573       5147        16.75
+DMDT01                               58368      51670       6698        11.48
+UNDOTBS1                             82944      68540      14404        17.37
+MDMDT01                             382976     350140      32836         8.57
+SMDATA                              246784     212548      34236        13.87
+DAWDT01                             488448     373773     114675        23.48
+ODSDT01                             606208     330803     275405        45.43
+
+
+
+
+resize the datafile for SAP
+===========================
+
+col file_name format a70
+col tablespace_name format a20
+set linesize 150
+set pages 50
+
+
+select a.FILE_ID,a.tablespace_name tablespace_name,substr(file_name,1,70) file_name,
+a.bytes/1024/1024 tot_mb, b.free_mb,trunc((free_mb/a.bytes)*100,2) "%Free"
+from dba_data_files a, (select file_id, sum(bytes)/1024/1024 free_mb from dba_free_space group by file_id) b
+where a.file_id = b.file_id(+) and a.tablespace_name='MDMDT01' order by 1;
+
+-- Check the Os space 
+
+oraed2 > df -h |grep /sapdata*
+/oracle/ED2/sapdata1   830G   686G   143G    83%    /oracle/ED2/sapdata1
+/oracle/ED2/sapdata2   740G   624G   115G    85%    /oracle/ED2/sapdata2
+/oracle/ED2/sapdata3   800G   677G   123G    85%    /oracle/ED2/sapdata3
+/oracle/ED2/sapdata4   770G   635G   134G    83%    /oracle/ED2/sapdata4
+
+
+
+
+
+TABLESPACE_NAME      FILE_NAME                                                                  TOT_MB    FREE_MB      %Free
+-------------------- ---------------------------------------------------------------------- ---------- ---------- ----------
+PSAPSR3              /oracle/ED2/sapdata2/sr3_24/sr3.data24                                      30720     61.875          0
+PSAPSR3              /oracle/ED2/sapdata3/sr3_29/sr3.data29                                      30720     58.875          0
+PSAPSR3              /oracle/ED2/sapdata2/sr3_34/sr3.data34                                      20480    58.9375          0
+PSAPSR3              /oracle/ED2/sapdata2/sr3_34/sr3.data34                                      30720   2751.875          0
+                            
+
+/oracle/ED2/sapdata2/sr3_34/sr3.data34
+
+
+-------------------------
+brspace -c force -f dfalter -a resize -f /oracle/BQ2/sapdata3/sr3_11/sr3.data11 -s 25000
+
+USERS_SMALL          /oradata/clqadb2/users_small.dbf                                            14808    25.3125   
+
+
+
+alter database datafile '/oracle/ED2/sapdata2/sr3_34/sr3.data34' resize 30g;
+
+
+alter tablespace TS_SNOM_D add datafile '/oradata/i2devdb3/TS_SNOM_D_03.dbf' size 20g;
+-------------------------
+
+show parameter dump; -- It will show the alert log file location--> open a duplicate session
+
+
+
+oraed2 > cd saptrace/diag/rdbms/ed2/ED2/trace/
+oraed2 > ls -ltr al*
+-rw-r-----   1 oraed2   dba      2386622 Mar  9  2011 alert_ED2.log.20110309
+-rwxrwxrwx   1 oraed2   dba      35559099 Dec 19 02:11 alert_ED2.log
+oraed2 > tail -100f alert_ED2.log
+
+------------------------- Lock-------------
+
+
+select sid,serial#,username,SQL_HASH_VALUE from v$session where username like 'APS%' and  sid in (select SESSION_ID from v$locked_object);
+
+select sid,serial#,username,SQL_HASH_VALUE from v$session VS join v$locked_object VL on (VS.sid=VL.SESSION_ID)
+-- where username like 'APS%';
+
+
+select OBJECT_ID,SESSION_ID,OS_USER_NAME from v$locked_object where SESSION_ID='776';
+
+
+select owner,object_type,OBJECT_ID from dba_objects where object_name='SD_SP_DISCONNECT_PSP_CON1_SC2';
+
+select SID,SERIAL# from V$SESSION where PLSQL_OBJECT_ID='28';
+
+milapsiqv2
+alter system kill session '776,19961'
+
+===========================================================================================
+change the version
+
+ Datapump exp using version as 11.1 if specified
+ /******** DIRECTORY=tmp DUMPFILE=i2prddb2_13FEB_2012_ods.dmp LOGFILE=i2prddb2_13FEB_2012_ods.log SCHEMAS=ods PARALLEL=4 VERSION=11.1.0 
+
+
+
+===============================================================================================
+
+find session
+
+col machine for a40
+col program for a40
+col username for a10
+set linesize 140
+select sid,serial#,username,program,machine from v$session where username is not null;
+
+
+select sid,serial#,username,program,machine from v$session where machine like '%SACAPSWK4%';
+
+userid   = scprpt.service;
+
+select sid,serial#,username,program,machine from v$session where username='scprpt.service';
+
+Apsusr
+
+APSUSR
+
+SD_SP_DISCONNECT_PSP_CON1_SC2
+
+select sid,serial#,username,program,machine from v$session where USERNAME='APSUSR';
+
+
+=============================================================================================
+
+export dumps need to keep the below location.
+
+
+
+We have exported the ODS schema in i2prddb2 in 11.1.0 version and placed in \\Hqe104009\ods_dump\ i2prddb2_13FEB_2012_ods.dmp
+
+
+start the backup
+sacbackup 
+
+login 
+$sudo bash
+#
+
+27/Feb/2012
+
+15 20 * * * /usr/sap/scripts/sap_db_backup.ksh > /usr/sap/logs/sap_db_backup.out -- backup started - 6.20 PM
+
+bash-3.00# ssh -l oragpp sacsapgppbk (sac) - connect the gpp zone.
+bash-3.00# ssh -l oragpp sacsapgppbkp (Mil)
+
+/oracle/GPP/
+
+/var/tmp  - check the backup log 
+
+/usr/local/bin/sudo su - orabpp - if sudo not working then.
+
+There netbackup installed in 
+----------------------------
+oraepp > pwd
+/usr/openv/netbackup/bin
+oraepp >
+
+oraepp > ls -ltr ora*
+-r-xr-xr-x   1 root     bin        34972 Feb 15  2011 oracle_link
+oraepp >
+
+
+
+
+standby server 
+
+all down.
+
+startup the db
+
+nohup /oracle/BPP/scripts/standby_recover_pit.ksh BPP > /oracle/BPP/scripts/log/standby_recover_delay.out &
+
+
+
+
+orabpp > crontab -l
+# Recover standby DB with 16hrs delay every hour
+#
+#00 * * * * /oracle/BPP/scripts/lock_standby_recover_delay.ksh BPP > /oracle/BPP/scripts/log/standby_recover_delay.out 2>&1
+# 00 * * * * /oracle/BPP/scripts/standby_recover_pit.ksh BPP > /oracle/BPP/scripts/log/standby_recover_delay.out 2>&1
+# Monitor stand by database
+#30 9,23 * * * /oracle/BPP/scripts/stand_by_status.ksh
+orabpp >
+
+
+strings -a spfileGPP.ora | grep -i audit
+
+
+--------------------------------
+
+Check open_cursors
+===================
+
+select a.value, s.username, s.sid, s.serial# from v$sesstat a, v$statname b, v$session s where a.statistic# = b.statistic#  and s.sid=a.sid 
+and b.name = 'opened cursors current'
+
+
+select max(a.value) as highest_open_cur, p.value as max_open_cur  from v$sesstat a, v$statname b, v$parameter p
+where a.statistic# = b.statistic# and b.name = 'opened cursors current' and p.name= 'open_cursors' group by p.value;
+
+
+
+===============================
+
+
+SQL> show parameter recovery
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest                string      /oracle/BPP/oraflash
+db_recovery_file_dest_size           big integer 115G
+recovery_parallelism                 integer     0
+SQL>
+
+
+
+
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE = 190G SCOPE=BOTH;
+
+
+SQL> show parameter DB_RECOVERY_FILE_DEST_SIZE;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest_size           big integer 190G
+
+
+set pages 100
+set lines 120SQL> SQL>
+SQL>
+SQL> SELECT * FROM V$FLASH_RECOVERY_AREA_USAGE
+
+
+SQL> show parameter DB_FLASHBACK_RETENTION_TARGET
+
+
+
+==================================
+
+
+
+col ACTION_TIME for a30
+select ACTION_TIME,VERSION from registry$history;
+
+====================================================================================
+
+
+SQL> select trunc(CREATION_TIME,'MONTH') Created_Month,sum(bytes/1024/1024/1024) from v$datafile group by trunc(CREATION_TIME,'MONTH') order by 1;
+
+
+======================
+
+
+SQL> 
+
+select trunc(CREATION_TIME,'MONTH') Created_Month,sum(bytes/1024/1024/1024) from v$datafile group by
+trunc(CREATION_TIME,'YEAR'),rollup(trunc(CREATION_TIME,'MONTH'));
+
+select trunc(CREATION_TIME,'YEAR') Created_Month,sum(bytes/1024/1024/1024) from v$datafile group by
+trunc(CREATION_TIME,'YEAR'),rollup(trunc(CREATION_TIME,'YEAR')) order by trunc(CREATION_TIME,'YEAR');
+
+CREATED_MONTH              SUM(BYTES/1024/1024/1024)
+-------------------------- -------------------------
+01-JUL-2008 00:00:00                      221.015625
+                                          221.015625
+01-JUN-2009 00:00:00                             150
+01-JUL-2009 00:00:00                             150
+01-AUG-2009 00:00:00                             180
+01-SEP-2009 00:00:00                         108.125
+01-OCT-2009 00:00:00                      192.539063
+01-NOV-2009 00:00:00                       127.65625
+01-DEC-2009 00:00:00                        19.53125
+                                          927.851563
+01-JAN-2010 00:00:00                         178.125
+01-FEB-2010 00:00:00                      119.296875
+01-MAR-2010 00:00:00                      123.945313
+01-APR-2010 00:00:00                        59.53125
+01-MAY-2010 00:00:00                       95.859375
+01-JUN-2010 00:00:00                        78.59375
+01-JUL-2010 00:00:00                             150
+01-AUG-2010 00:00:00                              30
+01-NOV-2010 00:00:00                      167.578125
+                                          1002.92969
+01-JAN-2011 00:00:00                       211.09375
+01-FEB-2011 00:00:00                              60
+01-MAR-2011 00:00:00                              30
+                                           301.09375
+
+24 rows selected.
+
+
+
+========================
+
+
+
+
+This script will report on all backups – full, incremental and archivelog backups -
+
+TIME_TAKEN_DISPLAY
+
+col TIME_TAKEN_DISPLAY for a15
+col STATUS format a9
+col hrs format 999.99
+select
+SESSION_KEY, INPUT_TYPE, STATUS,
+to_char(START_TIME,'mm/dd/yy hh24:mi') start_time,
+to_char(END_TIME,'mm/dd/yy hh24:mi')   end_time,
+TIME_TAKEN_DISPLAY                   hrs
+from V$RMAN_BACKUP_JOB_DETAILS where STATUS='COMPLETED'
+order by session_key;
+
+
+
+
+
+This script will report all on full and incremental backups, not archivelog backups -
+
+col STATUS format a9
+col hrs format 999.99
+select
+SESSION_KEY, INPUT_TYPE, STATUS,
+to_char(START_TIME,'mm/dd/yy hh24:mi') start_time,
+to_char(END_TIME,'mm/dd/yy hh24:mi')   end_time,
+elapsed_seconds/3600                   hrs
+from V$RMAN_BACKUP_JOB_DETAILS
+where input_type='DB INCR'
+order by session_key;
+
+
+
+SQL> select * from dba_blockers;
+
+no rows selected
+
+
+
+SQL> select sid,serial#,username,SQL_HASH_VALUE from v$session where username like 'APSUSR_QA' and  sid in (select SESSION_ID from v$locked_object);
+
+       SID    SERIAL# USERNAME                       SQL_HASH_VALUE
+---------- ---------- ------------------------------ --------------
+       388      42740 APSUSR_QA                                   0
+
+SQL>
+SQL> select * from dba_waiters;
+
+no rows selected
+
+SQL> select OBJECT_ID,SESSION_ID,OS_USER_NAME from v$locked_object where SESSION_ID='388';
+
+ OBJECT_ID SESSION_ID OS_USER_NAME
+---------- ---------- ------------------------------
+       212        388 Opsrpt.service
+   1878246        388 Opsrpt.service
+       165        388 Opsrpt.service
+
+SQL>
+SQL> select owner,object_name,object_type from dba_objects where OBJECT_ID='212';
+
+OWNER
+------------------------------
+OBJECT_NAME
+--------------------------------------------------------------------------------
+OBJECT_TYPE
+-------------------
+SYS
+SNAP$
+TABLE
+
+
+SQL> select owner,object_name,object_type from dba_objects where OBJECT_ID='1878246';
+
+OWNER
+------------------------------
+OBJECT_NAME
+--------------------------------------------------------------------------------
+OBJECT_TYPE
+-------------------
+APSUSR_QA
+MAT_VIEW_DTLD_PLG_RPT_2105
+TABLE
+
+
+SQL> select owner,object_name,object_type from dba_objects where OBJECT_ID='165';
+
+OWNER
+------------------------------
+OBJECT_NAME
+--------------------------------------------------------------------------------
+OBJECT_TYPE
+-------------------
+SYS
+MLOG$
+TABLE
+
+
+SQL>
+
+
+alter system kill session '388,42740'
+
+
+
+====================================================
+
+
+more stats_job.sh
+#!/usr/bin/ksh
+#
+$ORACLE_HOME/bin/sqlplus  /nolog   <<EOF
+conn / as sysdba
+Execute dbms_stats.gather_schema_stats(ownname=>'SM', estimate_percent=>10,cascade=>TRUE);
+Execute dbms_stats.gather_schema_stats(ownname=>'MDM', estimate_percent=>10,cascade=>TRUE);
+Execute dbms_stats.gather_schema_stats(ownname=>'ODS', estimate_percent=>10,cascade=>TRUE);
+EOF
+
+exit;
+echo "============================================================="
+echo "  Analyze job of ${ORACLE_SID} ended at `date +%m/%d/%Y_%T`.  "
+echo "  jobLogFile=${jobLogFile}                                   "
+echo "  Status=$status                                             "
+echo "============================================================="
+
+
+
+=============================================================
+
+
+
+oracle@i2prddb2 on milapsipv1 > more stats_job.sh
+#!/usr/bin/ksh
+#
+$ORACLE_HOME/bin/sqlplus  /nolog   <<EOF
+conn / as sysdba
+Execute dbms_stats.gather_schema_stats(ownname=>'SYS', estimate_percent=>100,cascade=>TRUE);
+Execute dbms_stats.gather_schema_stats(ownname=>'SYSTEM', estimate_percent=>100,cascade=>TRUE);
+EOF
+
+exit;
+echo "  Status=$status                                             "
+
+
+
+oracle@i2prddb2 on milapsipv1 >
+
+
+
+error in log
+============
+ORA-01555: snapshot too old: rollback segment number 5 with name "_SYSSMU5$" too small
+
+alter rollback segment "segment_name" shrink;
+
+ALTER ROLLBACK SEGMENT "_SYSSMU6$" SHRINK
+
+
+
+===================================================================
+
+
+flash recovery area
+==================
+
+SQL> show parameter recovery
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest                string      /oracle/BPP/oraflash
+db_recovery_file_dest_size           big integer 115G
+recovery_parallelism                 integer     0
+SQL>
+
+
+
+
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE = 190G SCOPE=BOTH;
+
+
+SQL> show parameter DB_RECOVERY_FILE_DEST_SIZE;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest_size           big integer 190G
+
+
+
+
+Undo tablespace
+===============
+
+select FILE_NAME,AUTOEXTENSIBLE from dba_data_files where FILE_NAME='/oracle/ED2/sapdata1/undo_1/undo.data1';
+
+alter database datafile '/oracle/BD1/sapdata2/sr3_3/sr3.data3' autoextend ON;
+
+===============================================================================================
+
+
+
+
+add datafile in standby
+========================
+
+
+
+Prod BPP
+=======
+
+       173   /oracle/BPP/sapdata5/undo_6/undo.data6
+
+Standby db
+==========
+
+check from prod
+===============
+select file#,name from v$datafile;
+
+
+standby 
+=======
+alter database create datafile 'UNNAMED00173' as '/oracle/BPP/sapdata5/undo_6/undo.data6'
+
+
+
+========================================================================================================================
+
+Tempfile move to new location.
+------------------------------
+
+SELECT v.file#, t.file_name, v.status FROM dba_temp_files t, v$tempfile v WHERE t.file_id = v.file#;
+
+SQL> SELECT v.file#, t.file_name, v.status FROM dba_temp_files t, v$tempfile v WHERE t.file_id = v.file#;
+
+     FILE# FILE_NAME                                                    STATUS
+---------- ------------------------------------------------------------ -------
+         1 /oradata4/i2prddb2/temp_01.dbf                               ONLINE
+         2 /oradata4/i2prddb2/temp_02.dbf                               ONLINE
+         3 /oradata4/i2prddb2/temp_03.dbff                              ONLINE
+         4 /oradata4/i2prddb2/temp_04.dbf                               ONLINE
+         5 /oradata4/i2prddb2/temp_05.dbf                               ONLINE
+         6 /oradata3/i2prddb2/temp_08.dbf                               ONLINE
+        12 /oradata4/i2prddb2/temp_06.dbf                               ONLINE
+        13 /oradata4/i2prddb2/temp_07.dbf                               ONLINE
+
+8 rows selected.
+
+SQL>
+
+
+
+/oradata1              461G   318G   139G    70%    /oradata1
+/oradata2              459G   378G    77G    84%    /oradata2
+/oradata3              499G   420G    74G    85%    /oradata3
+/oradata4              550G   515G    30G    95%    /oradata4
+
+
+
+
+ALTER DATABASE TEMPFILE '/u01/temp01.dbf' OFFLINE;
+
+ALTER DATABASE TEMPFILE '/oradata4/i2prddb2/temp_07.dbf' OFFLINE;
+
+
+cp -p /u01/temp01.dbf /u02/temp01.dbf
+
+
+ALTER DATABASE RENAME FILE '/u01/temp01.dbf' TO '/u02/temp01.dbf';
+
+
+ALTER DATABASE TEMPFILE '/u02/temp01.dbf' ONLINE;
+
+
+
+===============================================================================
+
+
+ALTER DATABASE TEMPFILE '/oradata4/i2prddb2/temp_07.dbf' OFFLINE;
+
+
+cp -p /oradata4/i2prddb2/temp_07.dbf /oradata1/i2prddb2/temp_07.dbf
+
+
+ALTER DATABASE RENAME FILE '/oradata4/i2prddb2/temp_07.dbf' TO '/oradata1/i2prddb2/temp_07.dbf';
+
+
+ALTER DATABASE TEMPFILE '/oradata1/i2prddb2/temp_07.dbf' ONLINE;
+
+
+rm /oradata4/i2prddb2/temp_07.dbf
+
+
+
+=================================================================================================================
+
+
+
+
+Capacity plan
+--------------
+
+
+SQL> select trunc(CREATION_TIME,'MONTH') Created_Month,sum(bytes/1024/1024/1024) from v$datafile group by
+trunc(CREATION_TIME,'YEAR'),rollup(trunc(CREATION_TIME,'MONTH'));  2
+
+CREATED_MONTH              SUM(BYTES/1024/1024/1024)
+01-JUL-2008 00:00:00                      221.015625
+                                          221.015625
+01-JUN-2009 00:00:00                             150
+01-JUL-2009 00:00:00                             150
+01-AUG-2009 00:00:00                             180
+01-SEP-2009 00:00:00                         108.125
+01-OCT-2009 00:00:00                      192.539063
+01-NOV-2009 00:00:00                       127.65625
+01-DEC-2009 00:00:00                        19.53125
+                                          927.851563
+01-JAN-2010 00:00:00                         178.125
+01-FEB-2010 00:00:00                      119.296875
+01-MAR-2010 00:00:00                      123.945313
+01-APR-2010 00:00:00                        59.53125
+01-MAY-2010 00:00:00                       95.859375
+01-JUN-2010 00:00:00                        78.59375
+01-JUL-2010 00:00:00                             150
+01-AUG-2010 00:00:00                              30
+01-NOV-2010 00:00:00                      167.578125
+                                          1002.92969
+01-JAN-2011 00:00:00                       211.09375
+01-FEB-2011 00:00:00                              60
+
+01-MAR-2011 00:00:00                              30
+                                           301.09375
+
+
+=========================================================================================================
+
+RMAN backup failed due to ORA-19606
+====================================
+
+ORA-19606: Cannot copy or restore to snapshot control file 
+
+RMAN> show all;
+CONFIGURE SNAPSHOT CONTROLFILE NAME TO '/oracle/product/11.2.0/dbhome_11203/dbs/snapcf_eicprd.f'; # default
+
+
+execute - in RMAN>
+
+CONFIGURE SNAPSHOT CONTROLFILE NAME TO '/oracle/product/11.2.0/dbhome_11203/dbs/snapcf1_eicprd.f';
+
+
+run the backup - it got success. 
+
+you can revert back to old name.
+
+
+
+=========================================================================================================
+
+
+
+RMAN
+====
+
+more /oracle/dba/scripts/rmanBackup.sh
+#!/usr/bin/ksh
+# This script is to backup database with Oracle Rman
+# Author Yong Ke Wu, SanDisk, Nov 07, 2007
+#
+
+. ${HOME}/.profile
+
+if [ $# -lt 1 ]; then
+   echo "You must specify a database to back up."
+   echo "Usage: $0 <db_name>"
+   exit 1
+fi
+
+backupType=`echo $2|tr "[a-z]" "[A-Z]"`
+if [[ "${backupType}" == "" ]]; then
+   backupType="Full Database Backup"
+fi
+
+mailList="yong.wu@sandisk.com,dl-HCL-Oracle-Admins@sandisk.com"
+
+date=`date +%h.%d.%Y_%T`
+scriptDir="/oracle/dba/scripts"
+backupDir="/backup/DB/${ORACLE_SID}/PhyBkp/rman"
+controlfileDir="${backupDir}/ctl"
+logDir="${backupDir}/logs"
+logFile="${logDir}/rman_backup_${ORACLE_SID}_${date}.log"
+
+#find ${backupDir} -mtime +7 -exec rm {} \;
+#find ${controlfileDir} -name "control*" -mtime +7 -exec rm {} \;
+find ${logDir} -name "rman*" -mtime +14 -exec rm {} \;
+
+touch $logDir/backup.started
+
+host=`hostname`
+pid=$$
+cd ${scriptDir}
+
+export CLASSPATH=${scriptDir}:/usr/java/lib:$ORACLE_HOME/jdbc/lib:$ORACLE_HOME/jdbc/lib/classes12.jar
+
+mailx -s "Agile backup start" DL-PLM-Admin@sandisk.com </dev/null
+java backupInfo ${pid} ${host} ${ORACLE_SID} Rman started ${logFile}
+
+echo " "
+echo "================================================="
+echo "  Rman backup started at `date +%h.%d.%Y_%T`.    "
+echo "  Backup Type = ${backupType}                    "
+echo "  ORACLE_SID=${ORACLE_SID}                       "
+echo "  ORACLE_HOME=${ORACLE_HOME}                     "
+echo "  PATH=${PATH}                                   "
+echo "  NLS_LANG=${NLS_LANG}                           "
+echo "  CLASSPATH=${CLASSPATH}                         "
+echo "================================================="
+
+if [[ "$backupType" == "ARCHIVELOG_ONLY" ]]; then
+
+mailx -s "Agile increamenta backup start" DL-PLM-Admin@sandisk.com </dev/null
+
+echo "  Backup Type = ${backupType}                    "
+rman nocatalog msglog ${logFile} <<rmanEOF
+connect target /
+RUN {
+   show all;
+   CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${backupDir}/%F';
+   CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '${backupDir}/dbf/${ORACLE_SID}.dbf_U_%u_S_%s_P_%p_T_%t' MAXPIECESIZE 5120 M;
+   delete noprompt force obsolete;
+   backup current controlfile;
+   backup archivelog all delete input;
+}
+exit;
+
+rmanEOF
+
+mailx -s "Agile increamenta backup end" DL-PLM-Admin@sandisk.com </dev/null
+
+else
+
+mailx -s "Agile full backup start" DL-PLM-Admin@sandisk.com </dev/null
+
+echo "  Backup Type = ${backupType}                    "
+rman nocatalog msglog ${logFile} <<rmanEOF
+connect target /
+RUN {
+#   CONFIGURE CONTROLFILE AUTOBACKUP ON;
+   CONFIGURE RETENTION POLICY TO REDUNDANCY 2;
+   CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${backupDir}/%F';
+   CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '${backupDir}/dbf/${ORACLE_SID}.dbf_U_%u_S_%s_P_%p_T_%t' MAXPIECESIZE 5120 M;
+   show all;
+#   allocate channel d1 type disk;
+#   allocate channel d2 type disk;
+#   set limit channel d1 kbytes 8192000 maxopenfiles 20 readrate 100;
+#   set limit channel d2 kbytes 8192000 maxopenfiles 20 readrate 100;
+   delete noprompt force obsolete;
+   backup current controlfile;
+   backup database;
+   backup archivelog all delete input;
+#   release channel d1;
+#   release channel d2;
+}
+exit;
+rmanEOF
+
+mailx -s "Agile full backup end" DL-PLM-Admin@sandisk.com </dev/null
+
+fi
+
+sqlplus -s /nolog << EOF
+   conn / as sysdba
+   alter database backup controlfile to '$controlfileDir/control01.${date}.ctl';
+EOF
+
+errorCheck=`grep -i error ${logFile}|wc -l|awk '{print $1}'`
+ORACheck=`grep -i ORA- ${logFile}|wc -l|awk '{print $1}'`
+
+if (( errorCheck > 0 || ORACheck > 0 )); then
+  status=Error
+  mail -s "${host}:${ORACLE_SID} Backup Errors" $mailList < ${logFile}
+else
+  status=Success
+  rm $logDir/backup.started
+fi
+
+java backupInfo ${pid} ${host} ${ORACLE_SID} Rman ended ${status}
+
+echo " "
+echo "================================================="
+echo "  Rman backup ended at `date +%h.%d.%Y_%T`       "
+echo "  LogFile=${logFile}                             "
+echo "  Status=$status                                 "
+echo "================================================="
+
+oracle@agprddb1 
+
+
+
+
+
+==================================================================================================
+
+RMAN restore
+=============
+
+rman_recover_pit.ksh
+#!/bin/bash
+export ORACLE_HOME=/oracle/${ORACLE_SID}/112_64
+export SAPDATA_HOME=/oracle/${ORACLE_SID}
+export date_time=`date '+%m%d%y_%H%M%S'`
+export logfile=/oracle/${ORACLE_SID}/scripts/log/standby_recover_pit_${date_time}.log
+export NLS_DATE_FORMAT='YYYY-MM-DD:HH24.MI.SS'
+
+${ORACLE_HOME}/bin/rman nocatalog msglog ${logfile} <<EOF > /dev/null 2>&1
+connect target /
+startup mount pfile='${ORACLE_HOME}/dbs/init${ORACLE_SID}.ora';
+set nocfau;
+run
+{
+SET UNTIL TIME "to_date('2012-04-19:09.00.00','YYYY-MM-DD:HH24.MI.SS')";
+RESTORE DATABASE;
+RECOVER DATABASE;
+}
+EXIT
+EOF
+
+echo "database point in time  recovered "
+
+Archive log sequence based recovery
+===================================
+
+
+rman_recover_pit.ksh
+#!/bin/bash
+export ORACLE_HOME=/oracle/${ORACLE_SID}/112_64
+export SAPDATA_HOME=/oracle/${ORACLE_SID}
+export date_time=`date '+%m%d%y_%H%M%S'`
+export logfile=/oracle/${ORACLE_SID}/scripts/log/standby_recover_pit_${date_time}.log
+export NLS_DATE_FORMAT='YYYY-MM-DD:HH24.MI.SS'
+
+${ORACLE_HOME}/bin/rman nocatalog msglog ${logfile} <<EOF > /dev/null 2>&1
+connect target /
+startup mount pfile='${ORACLE_HOME}/dbs/init${ORACLE_SID}.ora';
+set nocfau;
+run {
+  set until scn 1048438;
+  restore database;
+  recover database;
+  alter database open resetlogs;
+}
+EXIT
+EOF
+
+echo "database log seq based  recovered "
+
+
+run {
+  set until scn 1048438;
+  restore database;
+  recover database;
+  alter database open resetlogs;
+}
+
+
+
+
+
+
+Check archive log sequence from RMAN
+======================================
+
+RMAN> list backup of archivelog from logseq 29656 until logseq 29657;
+
+
+ARchive log only backup
+======================
+
+archives.sh
+
+rman nocatalog msglog ${logFile} <<rmanEOF
+connect target /
+run {
+   CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/orabackup/DB/i2prddb2/PhyBkp/rman/dbf/i2prddb2.dbf_U_%u_S_%s_P_%p_T_%t' MAXPIECESIZE 5 G;
+   backup archivelog from logseq 209846 until logseq 209899 delete input;
+}
+
+
+
+=====================================================================================================
+
+mknod - imp
+
+clqadb2@milorviq05:/oracle $ ls -ltr
+total 4515240
+drwxr-xr-x   3 oracle   dba         4096 Mar 17  2009 product
+drwxr-xr-x   4 oracle   dba         4096 Aug 21  2009 dba
+drwxr-xr-x   4 oracle   dba         4096 Apr 28  2010 admin
+drwxr-xr-x   4 oracle   dba         4096 Jun 30  2011 OEM_Agent
+drwxrwx---   7 oracle   dba         4096 Jul  1  2011 oraInventory
+drwxr-----   3 oracle   dba         4096 Jul  1  2011 oradiag_oracle
+-rwxr-xr-x   1 oracle   dba          395 May 11 09:38 imp_clqadb2.sh
+-rwxr-xr-x   1 oracle   dba          344 May 22 22:37 purge.ksh
+-rw-r--r--   1 oracle   dba      2200251594 Jun  3 23:03 clprddb_full.dmp.gz
+prw-r--r--   1 oracle   dba            0 Jun  5 03:48 mknod_tmp
+-rw-r--r--   1 oracle   dba      2108800 Jun  5 03:48 imp.log
+-rw-r--r--   1 oracle   dba      104697856 Jun 28 10:55 oracle_base.db
+-rwxr-xr-x   1 oracle   dba          100 Jun 28 11:25 imp_niku.sh
+-rw-r--r--   1 oracle   dba        73640 Jun 28 11:44 import.log
+-rw-------   1 oracle   dba        73633 Jun 28 11:44 nohup.out
+clqadb2@milorviq05:/oracle $
+
+================================================================================================
+
+clqadb2@milorviq05:/oracle $ more imp_clqadb2.sh
+#!/bin/ksh
+
+export ORACLE_SID=clqadb2
+export ORACLE_HOME=/oracle/product/10.2.0
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+export PATH=$ORACLE_HOME/bin:$PATH
+
+mknod mknod_tmp p
+gunzip< clprddb_full.dmp.gz > mknod_tmp &
+time imp \"/ as sysdba\" file=mknod_tmp fromuser=niku touser=niku buffer=409715200 log=imp.log feedback=50000
+
+mailx -s "import clqadb2 is complete" yong.wu@sandisk.com < imp.log
+clqadb2@milorviq05:/oracle $
+
+
+
+
+=====================================================================================================
+
+
+
+Please run below query in AGDEVDB1 and confirm once done.
+delete from rev where id not in (select min(id) from rev group by item, change);
+
+
+
+delete from agile.rev where id in (select id from (SELECT t.* , row_number() OVER (partition by item, change order by id) rn from agile.rev t)
+where rn>1)
+
+
+
+
+
+=======================================================================================================
+
+Find procedure code.
+
+select text from dba_source where type = 'PROCEDURE' and name ='FP_C002_POST_ODS' and owner='ODS_FAC'
+
+===================================
+
+log_buffer
+
+
+
+select sid, value from v$sesstat where statistic# = (select statistic# from v$statname where name = 'user commits') order by 2 desc;
+
+
+select b.name, a.value, round(sysdate - c.startup_time) days_old from v$sysstat a, v$statname b, v$instance c where a.statistic# = b.statistic# 
+and b.name in ('redo wastage','redo size');
+
+
+===================================
+
+object different with 2 schemas.
+
+
+
+SQL> select TABLE_NAME from dba_tables where OWNER='ODS_FAC'
+  2  minus
+  3  select TABLE_NAME from dba_tables where OWNER='ODS_FF';
+
+TABLE_NAME
+------------------------------
+BOMCOMPONENTSALT_0823
+FP_C002_GTT_D12081_QTYPER
+FP_C002_GTT_IBR_LOT_SIZE
+FP_C002_GTT_SFCHEADERRTG
+MULTIDIE_BOM
+
+SQL>
+
+
+SQL> select index_name from dba_indexes where OWNER='ODS_FAC'
+  2  minus
+  3  select index_name from dba_indexes where OWNER='ODS_FF';
+
+==================================
+
+
+Sysaux 
+
+select dbms_stats.get_stats_history_retention from dual; 
+
+select dbms_stats.get_stats_history_availability from dual; 
+
+
+
+exec dbms_stats.alter_stats_history_retention(14);
+
+exec dbms_stats.purge_stats(sysdate-24);
+
+V$SYSAUX_OCCUPANTS
+
+
+SQL>  select OCCUPANT_NAME,SPACE_USAGE_KBYTES from V$SYSAUX_OCCUPANTS;
+
+
+nohup /oracle/SMP/awr_purge.sh > /var/tmp/awr_purge.out &
+
+Maxdb
+=====
+
+Start LPP database procedure
+sudo su – sdb
+dbmcli -u control,sand1234 –d LPP
+db_online
+db_state
+db_ofline
+
+
+
+
+Schema Refresh 
+==============
+
+check both system
+=================
+
+col OWNER for a10
+col DIRECTORY_NAME for a40
+col DIRECTORY_PATH for a60
+set pages 300
+set linesize 200
+
+
+SQL> select * from dba_directories;
+
+
+
+create same user(schema) both systems.
+=====================================
+grand dba to both users.
+
+
+create dblink from target to source system under the IMP_USER schema.
+=====================================================================
+
+
+
+CREATE DATABASE LINK "REMOTE_IMPORT" CONNECT TO "IMP_USER" IDENTIFIED BY imp_user USING 'i2prddb2'
+
+
+CREATE OR REPLACE DIRECTORY IMP_DB AS '/backup/DB/i2tstdb2/ExpBkp'; // for directory
+
+
+GRANT READ, WRITE ON DIRECTORY IMP_DB TO imp_user; 
+
+
+nohup impdp userid="'imp_user/imp_user'" schemas=ODS directory=IMP_DIR network_link=REMOTE_IMPORT logfile=ODS_03sep2012_impdp.log REMAP_SCHEMA=ODS:ODS_1 parallel=4 &
+
+
+Directory should be both system.
+
+
+select * from dba_db_links;
+
+
+==================================================================================
+
+change the system date in db
+
+http://nuijten.blogspot.com/2010/11/change-sysdate-for-testing.html
+
+
+Sun Oct 07 23:15:49 2012
+ALTER SYSTEM SET fixed_date='NONE' SCOPE=BOTH;
+Sun Oct 07 23:30:05 2012
+
+
+
+
