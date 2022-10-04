@@ -1,0 +1,258 @@
+-- Create Databases Code
+
+USE [master];
+GO
+
+DROP DATABASE IF EXISTS App1AG_DB1;
+GO
+
+DROP DATABASE IF EXISTS App1AG_DB2;
+GO
+
+DROP DATABASE IF EXISTS App1AG_DB3;
+GO
+
+CREATE DATABASE [App1AG_DB1]
+ ON  PRIMARY 
+( NAME = N'App1AG_DB1', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB1.mdf' , SIZE = 3072KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'App1AG_DB1_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB1_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 1024KB)
+GO
+
+CREATE DATABASE [App1AG_DB2]
+ ON  PRIMARY 
+( NAME = N'App1AG_DB2', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB2.mdf' , SIZE = 3072KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'App1AG_DB2_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB2_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 1024KB)
+GO
+
+CREATE DATABASE [App1AG_DB3]
+ ON  PRIMARY 
+( NAME = N'App1AG_DB3', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB3.mdf' , SIZE = 3072KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'App1AG_DB3_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\App1AG_DB3_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 1024KB)
+GO
+
+
+--Full backup required to create an AG
+BACKUP DATABASE [App1AG_DB1] TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Backup\App1AG_DB1.bak' WITH FORMAT, INIT,  SKIP, NOREWIND, NOUNLOAD,  STATS = 10, CHECKSUM
+GO
+
+BACKUP DATABASE [App1AG_DB2] TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Backup\App1AG_DB2.bak' WITH FORMAT, INIT,  SKIP, NOREWIND, NOUNLOAD,  STATS = 10, CHECKSUM
+GO
+
+BACKUP DATABASE [App1AG_DB3] TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\Backup\App1AG_DB3.bak' WITH FORMAT, INIT,  SKIP, NOREWIND, NOUNLOAD,  STATS = 10, CHECKSUM
+GO
+-- Create Availability Group Code
+
+/*
+Author: Ryan Adams
+Website: https://www.ryanjadams.com
+Twitter: @ryanjadams
+
+This script must be executed in SQLCMD mode.  This script was designed to setup an AlwaysOn Availability Group
+in a custom lab environment.  Use at your own risk and DO NOT run this in production.  Make sure you read and understand
+it thoroughly.
+*/
+
+/* First we connect to each replica in order and create logins for the account running the SQL Server Service on the other replicas */
+:Connect NODE1
+
+USE [master]
+GO
+
+CREATE LOGIN [contoso\svc-sql2] FROM WINDOWS
+GO
+
+CREATE LOGIN [contoso\svc-sql3] FROM WINDOWS
+GO
+
+
+:Connect NODE2
+
+USE [master]
+GO
+
+CREATE LOGIN [contoso\svc-sql1] FROM WINDOWS
+GO
+
+CREATE LOGIN [contoso\svc-sql3] FROM WINDOWS
+GO
+
+
+:Connect NODE3
+
+USE [master];
+GO
+
+CREATE LOGIN [contoso\svc-sql1] FROM WINDOWS;
+GO
+
+CREATE LOGIN [contoso\svc-sql2] FROM WINDOWS;
+GO
+
+/* Next we connect to each replica and create the endpoint.
+We also grant connect permission on the endpoint to all of the other replica service accounts. */
+:Connect NODE1
+
+USE [master];
+GO
+
+CREATE ENDPOINT [AlwaysOn_EP]
+	STATE = STARTED
+	AS TCP (LISTENER_PORT = 5022, LISTENER_IP = (10.0.1.1)) /* Specify an IP value for LISTENER_IP to dedicate AlwaysOn traffic to its own NIC card */
+	FOR DATABASE_MIRRORING (ROLE = ALL /* Cannot use Witness as that is for mirroring only.  Partner will work but that's really just for mirroring terminology */
+		, AUTHENTICATION = WINDOWS NEGOTIATE /* Authentication can be Windows or Certificate of a combination in preference order.  Authorization can force NTLM or Kerberos. These are default values */
+		, ENCRYPTION = REQUIRED ALGORITHM AES); /* Default algorithm is RC4, however RC4 is marked depracated. Use AES (GUI uses AES by default, but TSQL does not) */
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql2];
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql3];
+GO
+
+:Connect NODE2
+
+USE [master];
+GO
+
+CREATE ENDPOINT [AlwaysOn_EP]
+	STATE = STARTED
+	AS TCP (LISTENER_PORT = 5022, LISTENER_IP = (10.0.1.2)) /* Specify an IP value for LISTENER_IP to dedicate AlwaysOn traffic to it's own NIC card */
+	FOR DATABASE_MIRRORING (ROLE = ALL /* Cannot use Witness as that is for mirroring only.  Partner will work but that's really just for mirroring terminology */
+		, AUTHENTICATION = WINDOWS NEGOTIATE /* Authentication can be Windows or Certificate of a combination in preference order.  Authorization can force NTLM or Kerberos. These are default values */
+		, ENCRYPTION = REQUIRED ALGORITHM AES); /* Default algorithm is RC4, however RC4 is marked depracated. Use AES (GUI uses AES by default, but TSQL does not) */
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql1];
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql3];
+GO
+
+
+:Connect NODE3
+
+USE [master];
+GO
+
+CREATE ENDPOINT [AlwaysOn_EP]
+	STATE = STARTED
+	AS TCP (LISTENER_PORT = 5022, LISTENER_IP = (172.18.0.3)) /* Specify an IP value for LISTENER_IP to dedicate AlwaysOn traffic to it's own NIC card */
+	FOR DATABASE_MIRRORING (ROLE = ALL /* Cannot use Witness as that is for mirroring only.  Partner will work but that's really just for mirroring terminology */
+		, AUTHENTICATION = WINDOWS NEGOTIATE /* Authentication can be Windows or Certificate of a combination in preference order.  Authorization can force NTLM or Kerberos. These are default values */
+		, ENCRYPTION = REQUIRED ALGORITHM AES); /* Default algorithm is RC4, however RC4 is marked depracated. Use AES (GUI uses AES by default, but TSQL does not) */
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql1];
+GO
+
+GRANT CONNECT ON ENDPOINT::[AlwaysOn_EP] TO [contoso\svc-sql2];
+GO
+
+/* Here we connect to each replica and ensure that the AlwaysOn extended events session is set to run at startup and that it is also started */
+:Connect NODE1
+
+IF EXISTS(SELECT * FROM sys.server_event_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER WITH (STARTUP_STATE=ON);
+END
+
+IF NOT EXISTS(SELECT * FROM sys.dm_xe_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER STATE=START;
+END
+
+GO
+
+:Connect NODE2
+
+IF EXISTS(SELECT * FROM sys.server_event_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER WITH (STARTUP_STATE=ON);
+END
+
+IF NOT EXISTS(SELECT * FROM sys.dm_xe_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER STATE=START;
+END
+
+GO
+
+:Connect NODE3
+
+IF EXISTS(SELECT * FROM sys.server_event_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER WITH (STARTUP_STATE=ON);
+END
+
+IF NOT EXISTS(SELECT * FROM sys.dm_xe_sessions WHERE name='AlwaysOn_health')
+BEGIN
+  ALTER EVENT SESSION [AlwaysOn_health] ON SERVER STATE=START;
+END
+
+GO
+
+/*
+There will be 3 databases included in our AG and they currently exist on NODE1.
+Prior to SQL 2016 we would have to do the following:
+	Backup each database data file to a share and then restore it on each replica making sure to use the "NORECOVERY" clause
+	Backup each database log file to a share and then restore it on each replica making sure to use the "NORECOVERY" clause
+
+With SQL 2016+ we can use Direct Seeding instead.
+*/
+
+/* Here we connect to our primary replica (NODE1) and create our AG. */
+:Connect NODE1
+
+/* We can use trace flag 9567 to enable compression for the VDI backup for the seeding process */
+DBCC TRACEON (9567, -1);
+GO
+
+USE [master];
+GO
+
+CREATE AVAILABILITY GROUP [App1AG]
+WITH (AUTOMATED_BACKUP_PREFERENCE = SECONDARY, FAILURE_CONDITION_LEVEL = 3, HEALTH_CHECK_TIMEOUT = 30000, DB_FAILOVER = ON, DTC_SUPPORT = PER_DB, CLUSTER_TYPE = WSFC) /* You can also use SECONDARY_ONLY, PRIMARY, or NONE
+Failure condition levels are from the least restrcitive of 1(SQL Service is down) to 5(Exhaustion of worker threads). 3 is the default.
+Health check default is 30 seconds, represented in milliseconds. This is how long we wait for sp_server_diagnostics to return. */
+FOR DATABASE [App1AG_DB1], [App1AG_DB2], [App1AG_DB3]
+REPLICA ON N'NODE1' WITH (ENDPOINT_URL = N'TCP://NODE1.contoso.com:5022', FAILOVER_MODE = AUTOMATIC, AVAILABILITY_MODE = SYNCHRONOUS_COMMIT, BACKUP_PRIORITY = 50, SECONDARY_ROLE(ALLOW_CONNECTIONS = ALL), SESSION_TIMEOUT = 10, SEEDING_MODE = AUTOMATIC),
+	N'NODE2' WITH (ENDPOINT_URL = N'TCP://NODE2.contoso.com:5022', FAILOVER_MODE = AUTOMATIC, AVAILABILITY_MODE = SYNCHRONOUS_COMMIT, BACKUP_PRIORITY = 60, SECONDARY_ROLE(ALLOW_CONNECTIONS = ALL), SESSION_TIMEOUT = 10, SEEDING_MODE = AUTOMATIC),
+	N'NODE3' WITH (ENDPOINT_URL = N'TCP://NODE3.contoso.com:5022', FAILOVER_MODE = MANUAL, AVAILABILITY_MODE = SYNCHRONOUS_COMMIT, BACKUP_PRIORITY = 70, SECONDARY_ROLE(ALLOW_CONNECTIONS = READ_ONLY), SESSION_TIMEOUT = 10, SEEDING_MODE = AUTOMATIC);
+GO
+
+/* Here we create a listener for our AG. If you have issues creating the listener check permissions in AD.
+	You might also have to turn the AG networks to client and cluster and then turn them back to none post-listener creation*/
+ALTER AVAILABILITY GROUP [App1AG]
+ADD LISTENER N'App1AG' (
+WITH IP
+((N'10.0.0.11', N'255.255.255.0'),('172.16.0.11','255.240.0.0'))
+, PORT=1433);
+GO
+
+/* Now that the AG exists we connect to each secondary replica and join it to the group
+	We also have to grant the CREATE ANY DATABASE permission so Seeding can create the DBs */
+:Connect NODE2
+
+ALTER AVAILABILITY GROUP [App1AG] JOIN;
+GO
+ALTER AVAILABILITY GROUP [App1AG] GRANT CREATE ANY DATABASE;
+GO
+
+:Connect NODE3
+
+ALTER AVAILABILITY GROUP [App1AG] JOIN;
+GO
+ALTER AVAILABILITY GROUP [App1AG] GRANT CREATE ANY DATABASE;
+GO
+
+--This query allows us to view seeding performance statistics
+SELECT * FROM sys.dm_hadr_physical_seeding_stats;
+
+/* Now we need to turn our trace flag back off */
+:Connect NODE1
+DBCC TRACEOFF (9567, -1);
+GO
+

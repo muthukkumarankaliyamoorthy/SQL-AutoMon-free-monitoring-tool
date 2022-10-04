@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[DBA_All_Server_Space](
 */
 
 -- DROP PROC [USP_DBA_GETSERVERSPACE]
--- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] @Free_Space_threshold = 10000 -- less than 10000 MB alert
+-- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] --@Free_Space_threshold = 10000 -- less than 10000 MB alert
 USE DBAdata
 GO
 alter PROCEDURE [dbo].[USP_DBA_GETSERVERSPACE]
@@ -56,7 +56,7 @@ Date         Coder							Description
 
 */
 --WITH ENCRYPTION
-(@Free_Space_threshold int)
+--(@Free_Space_threshold int)
 AS 
 
 
@@ -139,26 +139,29 @@ DECLARE @Precentage VARCHAR(200)
 
 if exists 
 (
-SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB FROM [DBA_ALL_SERVER_SPACE] A
+SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,min(Precentage_free) as Precentage_free FROM [DBA_ALL_SERVER_SPACE] A
 join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
-where ( 
-  (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P'))
-)
-and p.Precentage_free<11
+and a.drive=p.drive
+--where (   (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P')))
+
+where p.Precentage_free<15
+--and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
+group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,Precentage_free
+
 
 )
 begin
 
 DECLARE SPACECUR CURSOR FOR
 
-SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB FROM [DBA_ALL_SERVER_SPACE] A
+SELECT a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,min(Precentage_free) as Precentage_free FROM [DBA_ALL_SERVER_SPACE] A
 join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
-where ( 
-  (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P'))
-)
-and p.Precentage_free<15
+and a.drive=p.drive
+--where (   (a.FREE_SPACE_IN_MB<@Free_Space_threshold AND a.DRIVE NOT IN ('Q','P')))
+
+where p.Precentage_free<15
 --and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
-group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB
+group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,Precentage_free
 order by SERVER_NAME
 
 OPEN SPACECUR
