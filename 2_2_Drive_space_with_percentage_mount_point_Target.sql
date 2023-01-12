@@ -1,6 +1,6 @@
 USE [master]
 GO
-/****** Object:  StoredProcedure [dbo].[USP_drivespace_mount_point]    Script Date: 21/12/2022 15:00:16 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,12 +10,12 @@ select * from tbl_driveinfo_mount_point
 drop table [tbl_driveinfo_mount_point]
 CREATE TABLE [dbo].[tbl_driveinfo_mount_point](
 	[volume_mount_point] [nvarchar](512) NULL,
-	[available_bytes] [bigint] NULL,
-	[total_bytes] [bigint] NULL,
+	[available_GB] [bigint] NULL,
+	[total_GB] [bigint] NULL,
 	[PercentFree] [bigint] NULL
 ) 
 */
-create PROC [dbo].[USP_drivespace_mount_point]
+ALTER PROC [dbo].[USP_drivespace_mount_point]
 
 AS
 
@@ -36,15 +36,15 @@ truncate table tbl_driveinfo_mount_point
 			
 CREATE TABLE [dbo].[#tbl_driveinfo_mount_point_T](
 	[volume_mount_point] [nvarchar](512) NULL,
-	[available_bytes] [bigint] NULL,
-	[total_bytes] [bigint] NULL,
+	[available_GB] [bigint] NULL,
+	[total_GB] [bigint] NULL,
 	[logical_volume_name] [nvarchar](512) NULL
 ) 
 
 
 
 
-INSERT INTO #tbl_driveinfo_mount_point_T (volume_mount_point,available_bytes,total_bytes,logical_volume_name)
+INSERT INTO #tbl_driveinfo_mount_point_T (volume_mount_point,available_GB,total_GB,logical_volume_name)
 
 SELECT DISTINCT
 volumestats.volume_mount_point,
@@ -66,9 +66,9 @@ WHERE DistinctDrives.RowNum = 1
 
 insert into tbl_driveinfo_mount_point
 SELECT	volume_mount_point,
-			CAST(CAST(available_bytes AS DECIMAL(20,2)) / @divisor AS DECIMAL(20,2)) AS Available,
-			CAST(CAST(total_bytes AS DECIMAL(20,2)) / @divisor AS DECIMAL(20,2)) AS Total,
-			CAST(available_bytes AS DECIMAL(20,2))/CAST(total_bytes AS DECIMAL(20,2)) * 100  AS PercentFree
+			CAST(CAST(available_GB AS DECIMAL(20,2)) / @divisor AS DECIMAL(20,2)) AS Available,
+			CAST(CAST(total_GB AS DECIMAL(20,2)) / @divisor AS DECIMAL(20,2)) AS Total,
+			CAST(available_GB AS DECIMAL(20,2))/CAST(total_GB AS DECIMAL(20,2)) * 100  AS PercentFree
 			--,@DESC AS SERVERNAME
 	FROM #tbl_driveinfo_mount_point_T
 
