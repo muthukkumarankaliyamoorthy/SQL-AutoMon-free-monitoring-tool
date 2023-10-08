@@ -1,0 +1,1 @@
+mysqlcheck --check  -u root --password=Il0ve$ql@321 --port=2109 --all-databases >"C:\MYSQL_Backup_New\DBCC\mysqlcheck_log.txt"
