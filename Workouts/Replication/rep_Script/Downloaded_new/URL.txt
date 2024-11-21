@@ -1,0 +1,12 @@
+https://repltalk.com/2019/05/28/how-to-skip-a-transaction/
+1569335
+
+--https://www.sqlservercentral.com/articles/super-fast-transactional-replication-repair
+
+
+ROW COUNT
+--https://www.sqlshack.com/how-to-do-a-quick-estimated-compare-of-data-in-two-large-sql-server-databases-to-see-if-they-are-equal/
+
+
+sql-server-transactional-replication-moving-distribution-database
+--https://www.sqlshack.com/sql-server-transactional-replication-moving-distribution-database-step-by-step-guide/

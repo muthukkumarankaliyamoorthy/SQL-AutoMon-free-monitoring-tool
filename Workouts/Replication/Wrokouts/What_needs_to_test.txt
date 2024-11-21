@@ -1,0 +1,37 @@
+1. configure replication
+done
+2. Add monitor scripts - extened events & latency
+done
+
+How to find out how many commands are written per day  hours in replication. Check google and find out code.
+Tracer tokens are to measure the latency, it is useless, you can do that by script. Check google.
+
+3. Create alert
+we can 
+
+4. Reproduce the issues
+done
+==============
+5. Fix the issues with all options (direct fix, reinitialize - single article or from backup etc, recreate)
+
+	initialize Single article - done
+
+	initialize From backup - (47 min)
+
+2.Test remove only subscription and try it in the existing replication, which is configured by suing snapshot method
+Error - subscription is missing in subsciber and login account for distributer is using agent account, we can change it in subscription property
+New artile is not replicating it, only changes to existing artile are coming up.
+
+3.Test remove both publication (Script out Pub) and subscription and ty it , which is configured by suing snapshot method
+
+
+	initialize single article when initialized from backup - Same like Single article initialized , but only changes instead of sp_refreshsubscriptions,
+just generate new subscription (Video 57 min)
+using this method - both existing artile changes and new added article are coming
+
+==============
+
+6. dorp the replication and do the same again
+Done
+
+

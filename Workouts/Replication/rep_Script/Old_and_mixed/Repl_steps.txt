@@ -1,0 +1,37 @@
+\\NODE2\Repl_Snap_files
+
+1.	On Distributer server Create Distributer
+Choose server2  ? Next ? pass share path ? Leave DB name and change MDF and LDF file path ?Choose Publisher 
+?Add server1 ?Pass the password and remember or store it for adding another publisher for this remote Distributer ?Configure?Finish
+2.	Grant permission for all three logins to Distribution DB.
+muthu\Svc_repl_snapshot (DB_Owner) , muthu\Svc_repl_logreader (DB_Owner) & muthu\Svc_repl_distributer (DB_Owner)
+
+G0d$peed
+Pub_muthu_2
+
+3.	On Publisher server Create Publisher
+Create DB name for Subscriber on server3. You can have same name or different name. Better have same name.
+4.	Grant permission for all three logins to Distribution DB.
+ Grant DB_Owner only for Svc_repl_distributer to the Subscriber DB.
+
+5.	Create Publisher
+6.	Grant permission to the logins
+Svc_repl_snapshot (DB_Owner) , Svc_repl_logreader (DB_Owner) & Svc_repl_distributer (DB_Owner)
+
+7.	Go to replication ?Local publication ?new ?choose DB ?Transaction replication ? Choose articles (Tables, SP, Views / Indexed View, UDF). You can configure the article properties (FK, Constraint and index to replicate etc. For SP you can have both schema and execution to be replicated etc.) ? Next ? Mark check box Create snapshot immediately or schedule it in the agent ?pass snapshot agent credential & log reader credential ? Publication Name ?Finish
+8.	Check snapshot agent status and make sure the data is replicated.
+
+If the snapshot agent is says starting more than X time then there might be issue with password or permission etc. You can check that in Distributor DB Exec sp_helpdistpublisher ?Check  column called active is 1. If it is 0 you need to enable to active.
+
+sp_helpdistpublisher
+sp_changedistpublisher  @publisher =  'node1',  @property = 'active' , @value =  'true' 
+
+9.	Right click on publication ?Properties ? publication access list ? add distributor agent  (Svc_repl_distributer)
+
+10.	On Publisher server Create subscriber
+
+11.	Right click on publication and new subscriber 
+
+Choose subscription ? choose push or pull?push? add subscriber to server3 ?choose DB ?next ?Pass credential for distributer agent (Svc_repl_distributer) ?Run continuously or in schedule ?next?Finish
+12.	That’s all done. Do some changes in the table and make sure the changes are replicating.
+

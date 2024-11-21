@@ -1,0 +1,13 @@
+1. Replication monitor
+2. From extended events
+3. Scripts to alert for issue & latency
+
+=========
+How do you monitor repliation
+extended events
+latency -- Get google script brent ozar
+How do you alert errors
+https://www.sqlservercentral.com/forums/topic/how-to-set-alert-mails-for-replication-failure
+
+How do you fix the error
+-- Reproduce issue and learn it

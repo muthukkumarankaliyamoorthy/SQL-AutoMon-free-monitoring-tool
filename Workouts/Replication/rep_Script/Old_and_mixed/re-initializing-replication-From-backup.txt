@@ -1,0 +1,82 @@
+https://www.youtube.com/watch?v=wAP_tykTHdY
+
+Pre request:
+
+You need to drop the tables in subscripber since backup and restore will take whole DB. Remove tables, if any filer n column and rows make sure to remove that 
+
+For existing Connect to the Publisher and remove the subscription
+For new replication create the publication with out snapshot both option
+
+Trun on Allow initialized from backup - true
+
+----------=============
+
+--T-SQL: To enable this publication option we need execute the "sp_changepublication" stored procedure at the Publisher on the publication database.
+use [Muthu_1]
+  EXEC sp_changepublication 
+  @publication = 'Pub_Muthu_1', 
+  @property = 'allow_initialize_from_backup', 
+  @value = 'True'
+  GO 
+
+--When immediate sync is on, all changes in the log are tracked immediately after the initial snapshot is generated even if there are no subscriptions. 
+use [Muthu_1]
+  EXEC sp_changepublication 
+  @publication = 'Pub_Muthu_1', 
+  @property = 'immediate_sync', 
+  @value = 'True'
+  GO 
+
+G0d$peed
+Create DB back up
+
+  backup database [Muthu_1] to disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_full.bak'
+  backup database [Muthu_1] to disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_diff.bak' with differential
+  backup log [Muthu_1] to disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_log.trn' 
+
+Restore ful+dif+log on subscriber with replace
+
+  use master
+go
+  restore database [Muthu_1] from disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_full.bak' with replace,norecovery
+  restore database [Muthu_1] from disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_diff.bak' with norecovery
+  restore database [Muthu_1] from disk ='\\NODE2\LS_Copy_Logfile\Muthu_1_log.trn' with recovery
+
+use T-SQL to create subscription to be initialized from lastest diff or log backup
+Create subscription  on publisher server using t-sql
+
+
+/*
+Execute the stored procedure sp_addsubscription at the Publisher on the publication database, 
+ Specify the following parameter:
+ @sync_type = 'initialize with backup',
+   @backupdevicetype = 'Disk',
+ @backupdevicename = 'Backup Path'
+ */
+DECLARE @publication AS sysname;
+DECLARE @subscriber AS sysname;
+DECLARE @subscriptionDB AS sysname;
+SET @publication = N'Pub_Muthu_1';
+SET @subscriber = N'Node2';
+SET @subscriptionDB = N'Muthu_1';
+
+--Add a push subscription to a transactional publication.
+USE [Muthu_1]
+EXEC sp_addsubscription 
+  @publication = @publication, 
+  @subscriber = @subscriber, 
+  @destination_db = @subscriptionDB, 
+  @subscription_type = N'push',
+  @sync_type = 'initialize with backup',
+  @backupdevicetype = 'Disk',
+  @backupdevicename = '\\NODE2\LS_Copy_Logfile\Muthu_1_log.trn',
+  @update_mode = N'read only';
+
+Job 'NODE1-AdventureWorks2019-AW_Test_RD_1-NODE2-1007' started successfully.
+
+Go to subscription property and make sure to have correct distribution agent account. 
+MUTHU\Svc_repl_distributer -- G0d$peed
+
+Verify the replication status
+Do some DML
+Add one more new article

@@ -1,0 +1,58 @@
+https://sqlconjuror.com/sql-server-re-initializing-single-article-transaction-replication/
+
+1.  Turn off @allow_anonymous and @immediate_sync on the publication.
+
+use PUBLICATION_DB_NAME
+go
+EXEC sp_changepublication
+@publication = 'Replication_Test',
+@property = N'allow_anonymous',
+@value = 'false'
+GO
+               
+EXEC sp_changepublication
+@publication = 'Replication_Test',
+@property = N'immediate_sync',
+@value = 'false'
+GO
+The reason we have to disable @immediate_sync is that everytime you add a new article, and if @immediate_sync is enabled, it will cause the entire snapshot to be applied. Our objective is to only apply a particular article.
+
+2.  Add new article.
+
+EXEC sp_addarticle
+@publication = 'Replication_Test',
+@article = 'REPL_TABLE',
+@source_object = 'REPL_TABLE',
+@force_invalidate_snapshot = 1
+3.  Refresh the subscription
+
+EXEC sp_refreshsubscriptions @publication = 'Replication_Test'
+GO
+4.  Check the current snapshot agent history.
+
+use distribution
+go
+select * from dbo.MSsnapshot_history
+5.  Start Snapshot agent.
+
+EXEC sp_startpublication_snapshot @publication = 'Replication_Test';
+GO
+6.  Check the Snapshot Agent history again. You should see a snapshot generated only for the newly added article/s.
+
+7.  Turn ON @allow_anonymous and @immediate_sync on the publication.
+
+use PUBLICATION_DB_NAME
+go
+
+EXEC sp_changepublication
+@publication = 'Replication_Test',
+@property = N'immediate_sync',
+@value = 'true'
+GO
+
+
+EXEC sp_changepublication
+@publication = 'Replication_Test',
+@property = N'allow_anonymous',
+@value = 'true'
+GO

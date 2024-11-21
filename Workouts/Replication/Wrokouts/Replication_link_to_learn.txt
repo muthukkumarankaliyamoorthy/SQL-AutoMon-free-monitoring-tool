@@ -1,0 +1,20 @@
+https://www.youtube.com/@DbSkyLimit/search?query=replication
+
+https://sqlworldwide.com/monitoring-transaction-replication-latency-in-real-time/
+https://www.brentozar.com/archive/2014/07/monitoring-sql-server-transactional-replication/
+https://www.youtube.com/watch?v=m28K21Widn0
+===
+https://www.mssqltips.com/sqlservertip/4464/automate-sql-server-replication-monitoring/
+https://github.com/wetory/sql-server-replication-monitoring
+https://dba.stackexchange.com/questions/88923/replication-monitor-information-using-t-sql
+
+==========monitoring
+https://blog.rajanand.org/sql-server-replication-queries#heading-undistributed-commands-for-each-table
+https://codingsight.com/managing-your-ms-sql-replication/
+https://basitaalishan.com/2012/07/25/transact-sql-script-to-monitor-replication-status/
+
+=========PT of repl
+https://www.brentozar.com/archive/2014/07/performance-tuning-sql-server-transactional-replication-checklist/
+
+
+

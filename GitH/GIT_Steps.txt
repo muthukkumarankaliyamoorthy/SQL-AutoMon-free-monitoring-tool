@@ -1,0 +1,43 @@
+
+ssh-keygen -R github.com
+
+cd /d/GitHub/AutoMon
+
+
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master)
+git status
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master)
+git add 28_1_Job_Failed_last_one_day_excel.sql
+git add .
+
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master)
+git commit -m "Correcting Script"
+
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master)
+git pull origin master
+
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master) -- N@321
+git push origin master
+
+Muthu@LAPTOP-ISGUKEUC MINGW64 /d/GitHub/AutoMon (master)
+git status
+On branch master
+
+
+Merge branch 'master' of  Please enter a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+press "i" (i for insert)
+write your merge message
+press "esc" (escape)
+write ":wq" (write & quit)
+then press enter
+
+$ git pull origin master
+The authenticity of host 'github.com (20.207.73.82)' can't be established.
+ECDSA key fingerprint is SHA256:p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+
