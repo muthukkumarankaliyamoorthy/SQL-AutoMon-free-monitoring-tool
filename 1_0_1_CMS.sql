@@ -3,6 +3,7 @@
 Easy way to get table created is, use insert into table name --into tbl_A_temp
 Get script outed and change not null to null
 insert that into tbl_SQL_AutoMON
+--
 */
 
 --insert into [tbl_A_temp]
