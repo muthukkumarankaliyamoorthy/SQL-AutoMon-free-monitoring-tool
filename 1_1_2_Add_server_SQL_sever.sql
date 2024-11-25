@@ -1,11 +1,10 @@
 -- Linked server as SQL:
---EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
 
 
 
 use DBAData
 go
-create PROCEDURE [dbo].[USP_DBA_ADDSERVER_FOR_MONITOR]
+create PROCEDURE [dbo].[USP_DBA_ADDSERVER_FOR_MONITOR_SQL_LS]
 /*
 Summary:     Add server into AutoMon
 Contact:     Muthukkumaran Kaliyamoorthy SQL DBA
@@ -193,18 +192,20 @@ END
 
 /*
 
---Custom Script to add all the servers:
+--Custom Script to add all the servers: SQL based linked server
+-- change neccessary details login, password, catagory
 
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
-'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
-'@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
-from dbo.tbl_SQL_AutoMON where svr_Status <>'Server Not running'
+select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR_SQL_LS','@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
+'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''G0d$peed@123'',',
+'@P_category='''+Category+''',','@P_location='''+Location+''',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
+from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
 
---Custom Script to Drop all the servers:
 
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR','@P_SERVER='''+ServerName+''',',
+--Custom Script to Drop all SQL based linked servers:
+
+select 'EXEC [USP_DBA_DROPSERVER_FOR_MONITOR_SQL_LS_SQL_LS]','@P_SERVER='''+ServerName+''',',
 '@P_VERSION='''+Version+''',','@P_DESC='''+ServerName+''''
-from dbo.tbl_SQL_AutoMON where servername like '%ii%'
+from dbo.DBA_All_servers --where servername like '%ii%'
 
 
 */

@@ -22,7 +22,7 @@ convert (varchar(max),SERVERPROPERTY('ProductLevel')) AS [ProductLevel],
 convert (varchar(max),SERVERPROPERTY('ProductUpdateLevel')) AS [ProductUpdateLevel], 
 convert (varchar(max),SERVERPROPERTY('ProductUpdateReference')) AS [ProductUpdateReference], 
 --convert (varchar(max),SERVERPROPERTY('ProductVersion')) AS [ProductVersion], 
-convert (varchar(max),SERVERPROPERTY('ProductVersion')) AS [Version_Number], 
+convert (varchar(max),SERVERPROPERTY('ProductVersion')) AS [Version], 
 convert (varchar(max),SERVERPROPERTY('ResourceLastUpdateDateTime')) AS [ResourceLastUpdateDateTime], 
 convert (varchar(max),SERVERPROPERTY('ResourceVersion')) AS [ResourceVersion], 
 
@@ -92,5 +92,5 @@ from sys.dm_os_sys_info sysinfo
 
 
 
---EXEC master.dbo.xp_regread  'HKEY_LOCAL_MACHINE','Software\Microsoft\Windows NT\CurrentVersion','productname'
+EXEC master.dbo.xp_regread  'HKEY_LOCAL_MACHINE','Software\Microsoft\Windows NT\CurrentVersion','productname'
 

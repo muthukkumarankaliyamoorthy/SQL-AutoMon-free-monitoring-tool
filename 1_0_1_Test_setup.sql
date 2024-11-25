@@ -9,11 +9,15 @@ go
 create database DBAData
 create database DBAdata_Archive
 
-
 go
 use DBAData
 go
+
+-- It is an optional, if you loaded a data using export and import, no need to create this table tbl_SQL_AutoMON again and do not run bulk load command
+
 -- drop table tbl_SQL_AutoMON
+
+/*
 
 create table tbl_SQL_AutoMON
 (
@@ -92,12 +96,13 @@ create table tbl_SQL_AutoMON
 )
 
 BULK INSERT tbl_SQL_AutoMON  FROM 'C:\Users\UTIS LAPTOP 381\Desktop\KT\Inventory\servers.txt'WITH (FIELDTERMINATOR = '<>',ROWTERMINATOR = '\n')
-
+*/
 select Servername,COUNT(*) from dbo. tbl_SQL_AutoMON group by Servername having COUNT(*) >1
 
 -- select * from tbl_SQL_AutoMON
 
 select version from tbl_SQL_AutoMON group by version
+
 update tbl_SQL_AutoMON set version   ='SQL2000' where version like '8%'
 update tbl_SQL_AutoMON set version   ='SQL2005' where version like '9%'
 update tbl_SQL_AutoMON set version   ='SQL2008' where version like '10.0%'
@@ -115,7 +120,7 @@ select * from tbl_SQL_AutoMON
 
 -- update category
 
-UPDATE tbl_SQL_AutoMON set category ='Non-Prod' where servername not like '%ip%'
+UPDATE tbl_SQL_AutoMON set category ='Prod' where servername not like '%ip%'
 
 select * from tbl_SQL_AutoMON
 --select * from DBA_All_servers
@@ -127,7 +132,8 @@ No need to have all columns, only passing parameters in the EXEC USP_DBA_ADDSERV
 
 use DBAData
 go
---drop table DBA_All_servers
+-- drop table DBA_All_servers
+-- table2
 
 CREATE TABLE dbo.DBA_All_servers(
 	id int NOT NULL identity,
@@ -226,6 +232,7 @@ PRIMARY KEY CLUSTERED
 )
 )
 
+-- table 3
 go
 
 CREATE TABLE [dbo].[tbl_Error_handling](
@@ -240,6 +247,8 @@ CREATE TABLE [dbo].[tbl_Error_handling](
 ) ON [PRIMARY]
 go
 
+-- table 4
+
 CREATE TABLE [dbo].[DBA_ALL_OPERATORS](
 	[NAME] [varchar](25) NULL,
 	[EMAIL_ADDRESS] [nvarchar](100) NULL,
@@ -247,38 +256,13 @@ CREATE TABLE [dbo].[DBA_ALL_OPERATORS](
 	[Mail_copy] [varchar](5) NULL
 ) ON [PRIMARY]
 
+--add operators email
 select * from DBA_ALL_OPERATORS
 insert into DBA_ALL_OPERATORS values ('Muthu','muthukkumaran.kaliyamoorthy@abcd.com',1,'CC')
+insert into DBA_ALL_OPERATORS values ('DBA TEAM DL','SQLDBA@abcd.com',1,'CC')
 
 
-
---Custom Script to add all the servers: SQL linked server
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
-'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
-'@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
-from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
-
-
---Custom Script to add all the servers: Other source
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','@P_LINK_SERVER=''DBA_'+ServerName+''',@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
-'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''SApassword'',',
-'@P_category='''+Category+''',','@P_location=''India'',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
-from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
-
-
---Custom Script to Drop all the servers:
---Custom Script to drop all the servers: SQL linked server
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR',''''+ServerName+''',',
-''''+Version+''',',''''+ServerName+''''
-from dbo.DBA_All_servers --where servername like '%ii%'
-
---Custom Script to drop all the servers: Other source
-
---Custom Script to Drop all the servers:
---Custom Script to drop all the servers: SQL linked server
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR',''''+ServerName+''',',''''+ServerName+''',',
-''''+Version+''',',''''+Description+''''
-from dbo.DBA_All_servers --where servername like '%ii%'
+-------===========
 
 
 /*

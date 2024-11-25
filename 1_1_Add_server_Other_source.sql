@@ -1,9 +1,8 @@
 -- Linked server as Other provider - Different name:
---EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='DBA_LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
 
 use DBAData
 go
-create PROCEDURE [dbo].[USP_DBA_ADDSERVER_FOR_MONITOR]
+create PROCEDURE [dbo].[USP_DBA_ADDSERVER_FOR_MONITOR_Other_LS]
 /*
 Summary:     Add server into AutoMon
 Contact:     Muthukkumaran Kaliyamoorthy SQL DBA
@@ -191,19 +190,32 @@ END
 
 /*
 
+
 --Custom Script to add all the servers:
-select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR','''DBA_'+ServerName+''',',''''+ServerName+''',',
-''''+Version+''',',''''+ServerName+''',','''SA'',','''SApassword'',',
-''''+Category+''',','''India'',',''''+Edition+''',','''Running'',',''''+Login_Mode+''''
-from dbo.tbl_SQL_AutoMON where svr_Status <>'Server Not running'
 
---Custom Script to Drop all the servers:
 
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR','''DBA_'+ServerName+''',',''''+ServerName+''',',
-''''+Version+''',',''''+ServerName+''''
-from dbo.tbl_SQL_AutoMON where servername like '%ii%'
+--Custom Script to add all the servers: SQL linked server
+-- change neccessary details login, password, catagory
+
+--Custom Script to add all the servers: Other source
+select 'EXEC USP_DBA_ADDSERVER_FOR_MONITOR_Other_LS','@P_LINK_SERVER=''DBA_'+ServerName+''',@P_SERVER='''+ServerName+''',','@P_DESC='''+ServerName+''',',
+'@P_VERSION='''+Version+''',','@P_USERNAME=''SA'',','@P_PWD=''G0d$peed@123'',',
+'@P_category='''+Category+''',','@P_Location='''+Location+''',','@P_edition='''+Edition+''',','@P_svr_status=''Running'',','@P_login_mode='''+Login_Mode+''''
+from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
+
+
+--Custom Script to drop all the servers: Other source
+
+--Custom Script to Drop all the other source SQL servers:
+
+select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR_Other_LS','@P_LINK_SERVER'''+ServerName+''',','@P_SERVER'''+ServerName+''',',
+'@P_VERSION'''+Version+''',','@P_DESC'''+Description+''''
+from dbo.DBA_All_servers --where servername like '%ii%'
+
+
+
+
+
 
 */
-
-
 
