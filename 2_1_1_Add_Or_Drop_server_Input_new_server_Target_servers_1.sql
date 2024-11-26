@@ -31,7 +31,7 @@ GO
 -- check this value in the target server if run_value is 1 and change or comment the target server SP - [USP_TEMPSPACE_POP_percentage] to enable Ole Automation Procedures all the time. 
 -- Since it is enabling and disabling by default, if your system needs to be enabled all the time change it accordingoly
 --It should be 0(Disable) for security reason. By default it will be zero. 
---In our Store procedure [USP_TEMPSPACE_POP_percentage]if the run_value is 0, comment out the OLE Automation both enable and disable. 
+--In our Store procedure [USP_TEMPSPACE_POP_percentage]if the run_value is 0, commentout the OLE Automation both enable and disable. 
 
 exec master..sp_configure 'show advanced options', 1
 RECONFIGURE; 
@@ -108,7 +108,7 @@ go
 
 
 
-CREATE PROCEDURE [dbo].[USP_TEMPSPACE_POP_percentage]
+create PROCEDURE [dbo].[USP_TEMPSPACE_POP_percentage]
 AS
 BEGIN
 TRUNCATE TABLE TEMPSPACE_percentage

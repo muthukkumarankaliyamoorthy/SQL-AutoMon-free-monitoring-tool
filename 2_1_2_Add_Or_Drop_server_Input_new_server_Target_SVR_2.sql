@@ -13,20 +13,17 @@ USP_DBA_ADDSERVER_FOR_MONITOR & USP_DBA_DROPSERVER_FOR_MONITOR*/
 
 -- Add SQL based linked server
 
-EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
-
-
-
+EXEC [dbo].[USP_DBA_ADDSERVER_FOR_MONITOR_SQL_LS]	@P_SERVER='LAPTOP-ISGUKEUC\SQLEXPRESS',	@P_DESC='LAPTOP-ISGUKEUC\SQLEXPRESS',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='G0d$peed@123',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Express Edition (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windows'
 
 -- Add non SQL based linked server (Other source)
-EXEC USP_DBA_ADDSERVER_FOR_MONITOR	@P_LINK_SERVER='DBA_LAPTOP-ISGUKEUC\MUTHU',@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windwos'
+EXEC [USP_DBA_ADDSERVER_FOR_MONITOR_Other_LS]	@P_LINK_SERVER='DBA_LAPTOP-ISGUKEUC\MUTHU',@P_SERVER='LAPTOP-ISGUKEUC\MUTHU',	@P_DESC='LAPTOP-ISGUKEUC\MUTHU',	@P_VERSION='SQL2014',	@P_USERNAME='SA',	@P_PWD='SApassword',	@P_category='Non-Prod',	@P_location='India',	@P_edition='Enterprise Edition: Core-based Licensing (64-bit)',	@P_svr_status='Running',	@P_login_mode='Windwos'
 
 select * from DBA_All_servers
 
 -- Drop SQL based linked server
-EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
+EXEC [USP_DBA_DROPSERVER_FOR_MONITOR_SQL_LS_SQL_LS]	'LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
 -- Drop non SQL based linked server (Other source)
-EXEC USP_DBA_DROPSERVER_FOR_MONITOR	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
+EXEC [USP_DBA_DROPSERVER_FOR_MONITOR_Other_LS]	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'DBA_LAPTOP-ISGUKEUC\MUTHU',	'SQL2014',	'LAPTOP-ISGUKEUC\MUTHU'
 
 
 select Added_date,* FROM DBADATA.DBO.DBA_ALL_SERVERS where Description like '%ServerName.FQDN%'
