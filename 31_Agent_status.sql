@@ -5,7 +5,7 @@ use [DBAdata]
 --drop table tbl_agent_Status
 go
 CREATE TABLE [dbo].[tbl_agent_Status](
-	[servername] varchar(200) not null primary key,
+	[servername] varchar(200) not null,
 	instance_name varchar(200),
 	Edition varchar (50),
 	Status varchar (50),

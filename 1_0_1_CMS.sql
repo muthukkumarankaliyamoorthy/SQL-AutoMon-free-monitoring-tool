@@ -64,9 +64,10 @@ convert (varchar(max),CONNECTIONPROPERTY('local_tcp_port')) AS local_tcp_port,
 convert (varchar(max),CONNECTIONPROPERTY('client_net_address')) AS client_net_address,
 --sysinfo.virtual_machine_type_desc,
 'update HA' as [HA],
-'update Domain' as [Domain],'update OS' as [OS],
+DEFAULT_DOMAIN() as [Domain],'update OS' as [OS],
 server_type = case 
 when sysinfo.virtual_machine_type =1 then 'Virtual' else 'Physical' end,
+'Update cloud' as[is_cloud],
 cpu_count as [No_of_logical_cpu],
 hyperthread_ratio,
 cpu_count/hyperthread_ratio as [No_of_physical_cpu],
@@ -94,3 +95,8 @@ from sys.dm_os_sys_info sysinfo
 
 EXEC master.dbo.xp_regread  'HKEY_LOCAL_MACHINE','Software\Microsoft\Windows NT\CurrentVersion','productname'
 
+
+
+exec master..sp_configure 'show advanced options', 1
+RECONFIGURE; 
+exec master..sp_configure 'Ole Automation Procedures'

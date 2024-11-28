@@ -17,15 +17,24 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 )
 
+insert into Backup_filers_name (filer_name,filer_name_original,filer_Satus,access_from_local) values ('\\share','\\share','running','accessed')
+
 --drop table Backup_filer_space_check
 create table Backup_filer_space_check
 (Filer_name varchar(500),output varchar(1000),date datetime)
+
+use DBAdata
+go
+--drop table Backup_filer_space_check_final
+create table Backup_filer_space_check_final
+(Filer_name varchar(500),Free_space_GB varchar (1000),date datetime)
 
 use DBAdata_Archive
 go
 --drop table Backup_filer_space_check_final
 create table Backup_filer_space_check_final
 (Filer_name varchar(500),Free_space_GB varchar (1000),date datetime)
+
 
 */
 

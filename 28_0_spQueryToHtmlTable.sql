@@ -1,6 +1,7 @@
 
 --https://stackoverflow.com/questions/7070053/convert-a-sql-query-result-table-to-an-html-table-for-email
-
+use DBAdata
+go
 -- Description: Turns a query into a formatted HTML table. Useful for emails. 
 -- Any ORDER BY clause needs to be passed in the separate ORDER BY parameter.
 -- =============================================

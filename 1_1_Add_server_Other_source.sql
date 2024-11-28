@@ -208,8 +208,8 @@ from dbo.tbl_SQL_AutoMON --where svr_Status <>'Server Not running'
 
 --Custom Script to Drop all the other source SQL servers:
 
-select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR_Other_LS','@P_LINK_SERVER'''+ServerName+''',','@P_SERVER'''+ServerName+''',',
-'@P_VERSION'''+Version+''',','@P_DESC'''+Description+''''
+select 'EXEC USP_DBA_DROPSERVER_FOR_MONITOR_Other_LS','@P_LINK_SERVER='''+ServerName+''',','@P_SERVER='''+ServerName+''',',
+'@P_VERSION='''+Version+''',','@P_DESC='''+Description+''''
 from dbo.DBA_All_servers --where servername like '%ii%'
 
 

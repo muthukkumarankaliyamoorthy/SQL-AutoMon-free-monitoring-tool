@@ -67,9 +67,9 @@ DECLARE c_F_BAckup_Location CURSOR
 FOR
 -- select ha FROM DBADATA.DBO.DBA_ALL_SERVERS group by ha
 SELECT SERVERNAME,[DESCRIPTION] FROM DBADATA.DBO.DBA_ALL_SERVERS
-where ha  in ('NO HA')
+--where ha  in ('NO HA')
 --and [DESCRIPTION] not like '%express%'
-and [DESCRIPTION] not in ('SSS')
+where [DESCRIPTION] not in ('SSS')
 and svr_status ='running' and Category in ('LIVE','PROD')
 
 OPEN c_F_BAckup_Location

@@ -24,7 +24,7 @@ CREATE TABLE [dbo].[DBA_All_Server_Space](
 */
 
 -- DROP PROC [USP_DBA_GETSERVERSPACE]
--- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] @Free_Space_threshold_percentage= 15 -- less than 10000 MB alert
+-- Exec DBAdata.[dbo].[USP_DBA_GETSERVERSPACE] @Free_Space_threshold_percentage= 15, @P_FREE_SPACE_IN_MB=100000 -- less than 100 000 MB alert
 USE DBAdata
 GO
 create PROCEDURE [dbo].[USP_DBA_GETSERVERSPACE]
@@ -40,7 +40,7 @@ Date         Coder							Description
 
 */
 --WITH ENCRYPTION
-(@Free_Space_threshold_percentage int)
+(@Free_Space_threshold_percentage int,@P_FREE_SPACE_IN_MB int)
 AS 
 
 
@@ -128,7 +128,7 @@ join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
 and a.drive=p.drive
 --where (   (a.FREE_SPACE_IN_MB<@Free_Space_threshold_percentage AND a.DRIVE NOT IN ('Q','P')))
 
-where p.Precentage_free<@Free_Space_threshold_percentage
+where p.Precentage_free<@Free_Space_threshold_percentage and a.FREE_SPACE_IN_MB <@P_FREE_SPACE_IN_MB
 --and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
 group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,Precentage_free
 
@@ -143,7 +143,7 @@ join [dbo].[DBA_All_Server_Space_percentage] P on a.SERVER_NAME=p.SERVER_NAME
 and a.drive=p.drive
 --where (   (a.FREE_SPACE_IN_MB<@Free_Space_threshold_percentage AND a.DRIVE NOT IN ('Q','P')))
 
-where p.Precentage_free<@Free_Space_threshold_percentage
+where p.Precentage_free<@Free_Space_threshold_percentage and a.FREE_SPACE_IN_MB <@P_FREE_SPACE_IN_MB
 --and ((SERVER_NAME  not IN ('abcd','aa','bb','cc') and DRIVE ='c' and FREE_SPACE_IN_MB<4000))
 group by a.SERVER_NAME,a.DRIVE, a.FREE_SPACE_IN_MB,Precentage_free
 order by SERVER_NAME

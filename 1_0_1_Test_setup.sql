@@ -193,6 +193,7 @@ CREATE TABLE dbo.DBA_All_servers(
 	[SQL_bit] [varchar](50) NULL,
 	[OS_bit] [varchar](50) NULL,
 	[Is_VM] [varchar](20) NULL,
+	[is_cloud] [varchar](20) NULL,
 	[No_of_logical_cpu] [int] NULL,
 	[hyperthread_ratio] [int] NULL,
 	[No_of_physical_cpu] [int] NULL,

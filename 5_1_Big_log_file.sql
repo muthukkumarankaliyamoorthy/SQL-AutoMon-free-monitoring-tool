@@ -41,7 +41,7 @@ CREATE TABLE [dbo].[tbl_get_logfiles_Huge](
 */
 -- select * from tbl_get_logfiles_Huge
 --DROP PROC [Usp_dba_send_logfiles_size]
--- Exec [DBAdata].[dbo].[Usp_dba_send_logfiles_huge] @Log_Big_threshold = 500000 -- alert big log file
+-- Exec [DBAdata].[dbo].[Usp_dba_send_logfiles_huge] @Log_Big_threshold = 500000, @p_freespace =100000 -- alert big log file 100 000 gb
 create PROCEDURE [dbo].[Usp_dba_send_logfiles_huge]
 /*
 Summary:        Send the large log file size to DBA Team
@@ -55,7 +55,7 @@ Date                          Coder                                             
 *******************All the SQL keywords should be written in upper case********************
 */
 --WITH ENCRYPTION
-(@Log_Big_threshold int)
+(@Log_Big_threshold int, @p_freespace int)
 AS
 BEGIN
 SET nocount ON
@@ -192,7 +192,7 @@ END CATCH
       DECLARE @drive_size varchar(100)
 	  DECLARE @drive_letter varchar(100)
       
-if exists (select 1 from dbadata.dbo.tbl_get_logfiles_Huge where log_size>@Log_Big_threshold)
+if exists (select 1 from dbadata.dbo.tbl_get_logfiles_Huge where log_size>@Log_Big_threshold and  freespace<@p_freespace)
 
 begin
 
@@ -201,7 +201,8 @@ DECLARE SPACECUR CURSOR FOR
 SELECT servername,dbname, filename,Drive_letter,
 recovery_model,log_size,
 log_reuse_wait_desc,freespace
-FROM tbl_get_logfiles_Huge where log_size>@Log_Big_threshold
+FROM tbl_get_logfiles_Huge 
+where log_size>@Log_Big_threshold and  freespace<@p_freespace
 order by log_size desc
 
 OPEN SPACECUR

@@ -146,7 +146,7 @@ EXEC spQueryToHtmlTable @html = @html OUTPUT,
 select * from tbl_Blocking_Details
 
 '
-
+/*
 EXEC msdb.dbo.sp_send_dbmail
     @PROFILE_NAME=@@servername,
     @recipients = 'abcd.com',
@@ -157,7 +157,27 @@ EXEC msdb.dbo.sp_send_dbmail
     @body_format = 'HTML',
     @query_no_truncate = 1,
     @attach_query_result_as_file = 0;
-   
+*/
+
+DECLARE @EMAILIDS VARCHAR(500)
+SELECT @EMAILIDS=
+COALESCE(@EMAILIDS+';','')+EMAIL_ADDRESS  FROM DBAdata.DBO.DBA_ALL_OPERATORS
+WHERE STATUS =1
+
+DECLARE @EMAILIDS1 VARCHAR(500)
+SELECT @EMAILIDS1=
+COALESCE(@EMAILIDS1+';','')+EMAIL_ADDRESS  FROM DBAdata.DBO.DBA_ALL_OPERATORS
+WHERE STATUS =1 and Mail_copy='CC'
+
+EXEC MSDB.DBO.SP_SEND_DBMAIL @RECIPIENTS=@EMAILIDS,
+@PROFILE_NAME='muthu',
+@subject = 'Blocking Details:',
+@BODY = @html,
+@copy_recipients=@EMAILIDS1,
+@BODY_FORMAT = 'HTML',
+@query_no_truncate = 1,
+@attach_query_result_as_file = 0;
+
 end
 insert into DBAdata_Archive.dbo.tbl_Blocking_Details
 select *, getdate() to_date from tbl_Blocking_Details
