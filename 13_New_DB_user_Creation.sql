@@ -34,24 +34,28 @@ CREATE TABLE [dbo].[DBA_NEW_OBJECT_LOGIN_LIST](
 */
 
 
-create PROCEDURE [dbo].[USP_DBA_GETNEW_DB_AND_LOGIN]
+CREATE PROCEDURE [dbo].[USP_DBA_GETNEW_DB_AND_LOGIN]
+
+/*
+Summary:     New DB & Login alert
+Contact:     Muthukkumaran Kaliyamoorthy SQL DBA
+
+
+ChangeLog:
+Date         Coder							Description
+2013-jan-21	 Muthukkumaran Kaliyamoorhty     Updated the 2012 functionality                   
+
+
+*/
+
 AS BEGIN
 SET NOCOUNT ON
 TRUNCATE TABLE DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
 
 DECLARE @SERVERNAME VARCHAR(200)
 DECLARE @DESC VARCHAR(200)
---** PUT LOCAL SERVER FIRST.
---select @@servername
-INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
-SELECT @@servername as servername,NAME,CRDATE,'DATABASE' FROM MASTER.DBO.SYSDATABASES
-WHERE CRDATE >= GETDATE()-1
 
-INSERT INTO DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
-SELECT @@servername,LOGINNAME,CREATEDATE,'LOGIN'FROM MASTER.DBO.SYSLOGINS
-WHERE CREATEDATE >=GETDATE()-1
 
-PRINT @@SERVERNAME +' COMPLETED.'
 
 DECLARE ALLNEW_DB_LOGIN CURSOR
 FOR
@@ -97,75 +101,39 @@ IF EXISTS(
 SELECT 1 FROM [DBADATA].[DBO].[DBA_NEW_OBJECT_LOGIN_LIST]
 WHERE CREATE_DATE >=GETDATE()-1
 )
-BEGIN
-DECLARE @SERVER_NAME SYSNAME
-DECLARE @NAME SYSNAME
-DECLARE @CREATE_DATE DATETIME 
-DECLARE @TYPE VARCHAR(10)
 
-DECLARE NEWDB_LOGIN_CUR CURSOR FOR
-SELECT SERVER_NAME,NAME,TYPE,CREATE_DATE
-FROM DBADATA.DBO.[DBA_NEW_OBJECT_LOGIN_LIST] WHERE CREATE_DATE >=GETDATE()-1
 
-OPEN NEWDB_LOGIN_CUR
+BEGIN 
 
-FETCH NEXT FROM NEWDB_LOGIN_CUR
-INTO @SERVER_NAME,@NAME,@TYPE,@CREATE_DATE
+DECLARE @html nvarchar(MAX);
+EXEC spQueryToHtmlTable @html = @html OUTPUT,  
+@query = N'
+SELECT * FROM [DBADATA].[DBO].[DBA_NEW_OBJECT_LOGIN_LIST]
+WHERE CREATE_DATE >=GETDATE()-1
+'
 
-DECLARE @BODY1 VARCHAR(max)
---#ECE5B6
-SET @BODY1=  '<font size=2 color=BLUE  face=''verdana''><B>FOLLOWING ARE NEWLY CREATED DB AND LOGINs:</b> </font>
-<P> 
- <font size=1 color=BLUE  face=''verdana''>
-<Table border=1000 bgcolor=LIGHTBLUE cellpadding=1  style="color:BLUE;font-face:verdana;font-size:12px;">  
- <b>  <tr bgcolor=BLUE align=center style="color:WHITE;font-weight:bold"> 
-<td width=600 color=white>SERVERNAME</td>  
-<td width=200 color=white>NAME</td> 
-<td width=100 color=white>TYPE</td>  </b> 
- <td width=200 color=white>CREATE DATE</td>  
- </tr>'
 
-WHILE @@FETCH_STATUS=0
-BEGIN
-SET @BODY1= @BODY1 +'<tr>
-<td>'+ISNULL(@SERVER_NAME,'&nbsp;')+'</td>'+
-'<td>'+ISNULL(@NAME,'&nbsp;')+'</td>'+
-'<td align=center>'+ISNULL(@TYPE,'&nbsp;')+'</td>'+
-'<td align=center>'+ISNULL(CONVERT(CHAR(50),@CREATE_DATE),'&nbsp;')+'</td>' 
-FETCH NEXT FROM NEWDB_LOGIN_CUR
-INTO @SERVER_NAME,@NAME,@TYPE,@CREATE_DATE
-
-END
-SET @BODY1=@BODY1+'</Table> </p>
-<p>
-<font style="color:#7E2217;font-face:verdana;font-size:9px;"> Generated on '
-+convert(varchar(30),getdate(),100)+'. </BR>
-This is an auto generated mail by DBA Team. If you receive this email by mistake please contact us. 
- </br>
-© Property of DBA Team.
- </font>'
-
-CLOSE NEWDB_LOGIN_CUR
-DEALLOCATE NEWDB_LOGIN_CUR
 DECLARE @EMAILIDS VARCHAR(500)
 
 SELECT @EMAILIDS=
-COALESCE(@EMAILIDS+';','')+EMAIL_ADDRESS  
-FROM DBADATA.dbo.DBA_ALL_OPERATORS WHERE name ='muthu' and STATUS =1
-
-
+COALESCE(@EMAILIDS+';','')+EMAIL_ADDRESS  FROM dbo.DBA_ALL_OPERATORS
+WHERE STATUS=1
 DECLARE @EMAILIDS1 VARCHAR(500)
---SELECT @EMAILIDS1= 'Nageswararao.Kankipati@cna.com;Sadhana.Bandakunta@cna.com'
-
+SELECT @EMAILIDS1=
+COALESCE(@EMAILIDS1+';','')+EMAIL_ADDRESS  FROM DBAdata.DBO.DBA_ALL_OPERATORS
+WHERE STATUS =1 and Mail_copy='CC'
 
 EXEC MSDB.DBO.SP_SEND_DBMAIL @RECIPIENTS=@EMAILIDS,
-@SUBJECT = 'DBA: New DB and Objects creation',
-@BODY = @BODY1,
+@subject = 'FOLLOWING ARE NEWLY CREATED DBs AND LOGINs:',
+@BODY = @html,
 @copy_recipients=@EMAILIDS1,
-@BODY_FORMAT = 'HTML' ,@PROFILE_NAME='muthu';
---select @BODY1
--------------------------------------------------------
-END
+--@blind_copy_recipients='HCL_NOC@sandisk.com',
+@BODY_FORMAT = 'HTML' ,@PROFILE_NAME='BIDATALOAD',
+@query_no_truncate = 1,
+@attach_query_result_as_file = 0;
+
+
+end
 
 insert into DBADATA_Archive.DBO.DBA_NEW_OBJECT_LOGIN_LIST
 select *,getdate() from DBADATA.DBO.DBA_NEW_OBJECT_LOGIN_LIST
